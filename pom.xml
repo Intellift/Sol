@@ -30,6 +30,7 @@
         <module>sol-controller</module>
         <module>sol-controller-simple</module>
         <module>sol-controller-querydsl</module>
+        <module>sol-sdk-client</module>
     </modules>
 
     <dependencyManagement>
