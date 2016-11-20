@@ -12,7 +12,7 @@ import java.util.List;
  */
 public interface PageMapper<E, D> extends Mapper<E, D> {
 
-    default Page<D> mapTo(Page<E> page) {
+    default Page<D> mapTo(final Page<E> page) {
         final List<D> objects = mapTo(page.getContent());
 
         return new PageImpl<>(
@@ -22,7 +22,7 @@ public interface PageMapper<E, D> extends Mapper<E, D> {
         );
     }
 
-    default Page<E> mapFrom(Page<D> page) {
+    default Page<E> mapFrom(final Page<D> page) {
         final List<E> objects = mapFrom(page.getContent());
 
         return new PageImpl<>(

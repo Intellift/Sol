@@ -1,16 +1,15 @@
 package org.intellift.sol.service;
 
 
-import javaslang.Tuple;
 import javaslang.collection.Stream;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
-import org.intellift.sol.domain.exception.NotFoundException;
 import org.intellift.sol.domain.repository.Repository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.io.Serializable;
-import java.util.Objects;
 
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
@@ -21,8 +20,16 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
 
     Repository<E, ID> getEntityRepository();
 
+    default Try<Boolean> exists(final ID id) {
+        return Try.of(() -> getEntityRepository().exists(id));
+    }
+
     default Try<E> save(final E entity) {
         return Try.of(() -> getEntityRepository().save(entity));
+    }
+
+    default Try<Page<E>> findAll(final Pageable pageable) {
+        return Try.of(() -> getEntityRepository().findAll(pageable));
     }
 
     default Try<Stream<E>> findAll() {
@@ -33,22 +40,27 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return Try.of(() -> Option.of(getEntityRepository().findOne(id)));
     }
 
-    default Try<E> replace(final ID id, final E entity) {
+    default Try<Option<E>> findOne(final E entity) {
         return Try
-                .of(() -> Option
-                        .when(getEntityRepository().exists(id), () -> Tuple.of(id, entity))
-                        .getOrElseThrow(() -> new NotFoundException(getEntityClass(), "id", id)))
-                .flatMap(t -> Objects.equals(t._1, t._2.getId()) ? Try.of(() -> Option.of(t._2)) : delete(t._1))
-                .flatMap(e -> save(e.get()));
+                .of(entity::getId)
+                .flatMap(this::findOne);
     }
 
     default Try<Option<E>> delete(final ID id) {
         return findOne(id).flatMap(e ->
                 Try.of(() -> {
-                    if (e.isDefined()) getEntityRepository().delete(e.get());
+                    if (e.isDefined()) {
+                        getEntityRepository().delete(e.get());
+                    }
 
                     return e;
                 })
         );
+    }
+
+    default Try<Option<E>> delete(final E entity) {
+        return Try
+                .of(entity::getId)
+                .flatMap(this::delete);
     }
 }

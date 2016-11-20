@@ -4,6 +4,7 @@ import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.domain.exception.NotFoundException;
 import org.intellift.sol.mapper.Mapper;
 import org.intellift.sol.service.CrudService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -39,6 +40,8 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
     default ResponseEntity<D> post(@RequestBody final D dto) {
         final E entity = getEntityMapper().mapFrom(dto);
 
+        entity.setId(null);
+
         final E createdEntity = getEntityService().save(entity)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
 
@@ -55,12 +58,17 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
     default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final D dto) {
         final E entity = getEntityMapper().mapFrom(dto);
 
-        final E replacedEntity = getEntityService().replace(id, entity)
+        entity.setId(id);
+
+        final Boolean exists = getEntityService().exists(id)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
 
-        final D replacedDto = getEntityMapper().mapTo(replacedEntity);
+        final E savedEntity = getEntityService().save(entity)
+                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
 
-        return ResponseEntity.ok(replacedDto);
+        final D savedDto = getEntityMapper().mapTo(savedEntity);
+
+        return new ResponseEntity<>(savedDto, exists ? HttpStatus.OK : HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")

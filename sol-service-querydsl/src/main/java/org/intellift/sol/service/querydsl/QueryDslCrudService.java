@@ -16,6 +16,7 @@ import java.io.Serializable;
  */
 public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Serializable> extends CrudService<E, ID> {
 
+    @Override
     QueryDslRepository<E, ID> getEntityRepository();
 
     default Try<Page<E>> findAll(Predicate predicate, Pageable pageable) {

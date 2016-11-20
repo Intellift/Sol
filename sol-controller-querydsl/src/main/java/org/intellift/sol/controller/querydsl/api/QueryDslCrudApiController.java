@@ -18,8 +18,10 @@ import java.util.function.Function;
  */
 public interface QueryDslCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> extends CrudApiController<E, D, ID> {
 
+    @Override
     PageMapper<E, D> getEntityMapper();
 
+    @Override
     QueryDslCrudService<E, ID> getEntityService();
 
     @GetMapping
