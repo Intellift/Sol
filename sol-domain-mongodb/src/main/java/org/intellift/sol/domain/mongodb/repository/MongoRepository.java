@@ -1,4 +1,4 @@
-package org.intellift.sol.domain.jpa.repository;
+package org.intellift.sol.domain.mongodb.repository;
 
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.domain.repository.Repository;
@@ -10,5 +10,5 @@ import java.io.Serializable;
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
 @NoRepositoryBean
-public interface JpaRepository<T extends Identifiable<ID>, ID extends Serializable> extends Repository<T, ID>, org.springframework.data.jpa.repository.JpaRepository<T, ID> {
+public interface MongoRepository<E extends Identifiable<ID>, ID extends Serializable> extends Repository<E, ID>, org.springframework.data.mongodb.repository.MongoRepository<E, ID> {
 }

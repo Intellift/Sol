@@ -22,8 +22,10 @@
     <modules>
         <module>sol-domain</module>
         <module>sol-domain-jpa</module>
+        <module>sol-domain-mongodb</module>
         <module>sol-domain-querydsl</module>
         <module>sol-domain-querydsl-jpa</module>
+        <module>sol-domain-querydsl-mongodb</module>
         <module>sol-service</module>
         <module>sol-service-querydsl</module>
         <module>sol-mapper</module>

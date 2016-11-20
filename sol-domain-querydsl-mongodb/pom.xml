@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>sol-domain-jpa</artifactId>
+    <artifactId>sol-domain-querydsl-mongodb</artifactId>
 
     <parent>
         <groupId>org.intellift.sol</groupId>
@@ -15,13 +15,18 @@
     <dependencies>
         <dependency>
             <groupId>org.intellift.sol</groupId>
-            <artifactId>sol-domain</artifactId>
+            <artifactId>sol-domain-querydsl</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>org.intellift.sol</groupId>
+            <artifactId>sol-domain-mongodb</artifactId>
             <version>0.1.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-jpa</artifactId>
+            <groupId>com.querydsl</groupId>
+            <artifactId>querydsl-mongodb</artifactId>
         </dependency>
     </dependencies>
 </project>
