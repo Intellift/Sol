@@ -8,11 +8,11 @@ import java.lang.reflect.Type;
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
-public class CustomParameterizedTypeReference<T> extends ParameterizedTypeReference<T> {
+public class PageResponseTypeReference<T> extends ParameterizedTypeReference<T> {
 
     private final Class<?> dtoClass;
 
-    public CustomParameterizedTypeReference(Class<?> dtoClass) {
+    public PageResponseTypeReference(Class<?> dtoClass) {
         this.dtoClass = dtoClass;
     }
 

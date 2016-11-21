@@ -6,7 +6,7 @@ import javaslang.collection.List;
 import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
-import org.intellift.sol.sdk.client.internal.CustomParameterizedTypeReference;
+import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.util.concurrent.ListenableFuture;
@@ -59,7 +59,7 @@ public abstract class CrudApiAsyncClient<D extends Identifiable<ID>, ID extends 
                 uri,
                 HttpMethod.GET,
                 httpEntity,
-                new CustomParameterizedTypeReference<Page<D>>(getDtoClass()) {
+                new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                 }
         ));
     }
