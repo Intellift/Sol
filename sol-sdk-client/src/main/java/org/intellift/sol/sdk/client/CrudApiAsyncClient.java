@@ -1,5 +1,6 @@
 package org.intellift.sol.sdk.client;
 
+import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.List;
 import javaslang.concurrent.Future;
@@ -16,17 +17,15 @@ import java.io.Serializable;
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
-public abstract class CrudApiClient<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> {
+public abstract class CrudApiAsyncClient<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> {
 
     protected final AsyncRestOperations asyncRestOperations;
 
-    public CrudApiClient(AsyncRestOperations asyncRestOperations) {
+    public CrudApiAsyncClient(AsyncRestOperations asyncRestOperations) {
         this.asyncRestOperations = asyncRestOperations;
     }
 
     public abstract Class<D> getDtoClass();
-
-    public abstract String getBaseUrl();
 
     public abstract String getEndpoint();
 
@@ -43,15 +42,16 @@ public abstract class CrudApiClient<E extends Identifiable<ID>, D extends Identi
     }
 
     @SafeVarargs
-    public final Future<ResponseEntity<PageResponse<D>>> getAll(final Tuple2<String, List<String>>... parameters) {
+    public final Future<ResponseEntity<PageResponse<D>>> getAll(final Tuple2<String, Iterable<String>>... parameters) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
-        final String url = String.join("/", getBaseUrl(), getEndpoint());
+        final String url = getEndpoint();
 
         final UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(url);
 
         List.of(parameters)
-                .map(t -> t._2.size() > 1 ? new Tuple2<>(String.join("", t._1, "[]"), t._2) : t)
+                .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
+                .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
                 .forEach(t -> t._2.forEach(value -> {
                     uriComponentsBuilder.queryParam(t._1, value);
                 }));
@@ -68,7 +68,7 @@ public abstract class CrudApiClient<E extends Identifiable<ID>, D extends Identi
     public Future<ResponseEntity<D>> getOne(final ID id) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
-        final String url = String.join("/", getBaseUrl(), getEndpoint(), (String) id);
+        final String url = String.join("/", getEndpoint(), String.valueOf(id));
 
         return convert(asyncRestOperations.exchange(
                 url,
@@ -81,7 +81,7 @@ public abstract class CrudApiClient<E extends Identifiable<ID>, D extends Identi
     public Future<ResponseEntity<D>> create(final D dto) {
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
-        final String url = String.join("/", getBaseUrl(), getEndpoint());
+        final String url = getEndpoint();
 
         return convert(asyncRestOperations.exchange(
                 url,
@@ -94,7 +94,7 @@ public abstract class CrudApiClient<E extends Identifiable<ID>, D extends Identi
     public Future<ResponseEntity<D>> update(final D dto) {
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
-        final String url = String.join("/", getBaseUrl(), getEndpoint(), (String) dto.getId());
+        final String url = String.join("/", getEndpoint(), String.valueOf(dto.getId()));
 
         return convert(asyncRestOperations.exchange(
                 url,
@@ -107,7 +107,7 @@ public abstract class CrudApiClient<E extends Identifiable<ID>, D extends Identi
     public Future<ResponseEntity<Void>> delete(final ID id) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
-        final String url = String.join("/", getBaseUrl(), getEndpoint(), (String) id);
+        final String url = String.join("/", getEndpoint(), String.valueOf(id));
 
         return convert(asyncRestOperations.exchange(
                 url,
