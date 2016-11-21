@@ -3,6 +3,7 @@ package org.intellift.sol.sdk.client;
 import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.List;
+import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.domain.PageResponse;
@@ -13,6 +14,7 @@ import org.springframework.web.client.AsyncRestOperations;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
@@ -47,14 +49,11 @@ public abstract class CrudApiAsyncClient<E extends Identifiable<ID>, D extends I
 
         final String url = getEndpoint();
 
-        final UriComponentsBuilder uriComponentsBuilder = UriComponentsBuilder.fromUriString(url);
-
-        List.of(parameters)
+        final UriComponentsBuilder uriComponentsBuilder = Stream.of(parameters)
                 .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
                 .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
-                .forEach(t -> t._2.forEach(value -> {
-                    uriComponentsBuilder.queryParam(t._1, value);
-                }));
+                .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)))
+                .foldLeft(UriComponentsBuilder.fromUriString(url), (builder, t) -> builder.queryParam(t._1, t._2));
 
         return convert(asyncRestOperations.exchange(
                 uriComponentsBuilder.toUriString(),
