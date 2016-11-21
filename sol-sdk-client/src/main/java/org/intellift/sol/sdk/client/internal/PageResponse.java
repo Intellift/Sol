@@ -1,4 +1,4 @@
-package org.intellift.sol.domain;
+package org.intellift.sol.sdk.client.internal;
 
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;

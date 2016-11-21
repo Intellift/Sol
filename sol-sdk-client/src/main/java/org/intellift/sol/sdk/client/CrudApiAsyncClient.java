@@ -6,8 +6,8 @@ import javaslang.collection.List;
 import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
-import org.intellift.sol.domain.PageResponse;
-import org.intellift.sol.sdk.client.config.CustomParameterizedTypeReference;
+import org.intellift.sol.sdk.client.internal.CustomParameterizedTypeReference;
+import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestOperations;
@@ -18,7 +18,7 @@ import java.io.Serializable;
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
-public abstract class CrudApiAsyncClient<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> {
+public abstract class CrudApiAsyncClient<D extends Identifiable<ID>, ID extends Serializable> {
 
     protected final AsyncRestOperations asyncRestOperations;
 
@@ -43,7 +43,7 @@ public abstract class CrudApiAsyncClient<E extends Identifiable<ID>, D extends I
     }
 
     @SafeVarargs
-    public final Future<ResponseEntity<PageResponse<D>>> getAll(final Tuple2<String, Iterable<String>>... parameters) {
+    public final Future<ResponseEntity<Page<D>>> getAll(final Tuple2<String, Iterable<String>>... parameters) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
         final String endpoint = getEndpoint();
@@ -59,7 +59,7 @@ public abstract class CrudApiAsyncClient<E extends Identifiable<ID>, D extends I
                 uri,
                 HttpMethod.GET,
                 httpEntity,
-                new CustomParameterizedTypeReference<PageResponse<D>>(getDtoClass()) {
+                new CustomParameterizedTypeReference<Page<D>>(getDtoClass()) {
                 }
         ));
     }

@@ -1,7 +1,7 @@
-package org.intellift.sol.sdk.client.config;
+package org.intellift.sol.sdk.client.internal;
 
-import org.intellift.sol.domain.PageResponse;
 import org.springframework.core.ParameterizedTypeReference;
+import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Type;
 
@@ -18,8 +18,9 @@ public class CustomParameterizedTypeReference<T> extends ParameterizedTypeRefere
 
     @Override
     public Type getType() {
-        Type[] responseWrapperActualTypes = {dtoClass};
-        return new ParameterizedTypeImpl(
+        final Type[] responseWrapperActualTypes = {dtoClass};
+
+        return ParameterizedTypeImpl.make(
                 PageResponse.class,
                 responseWrapperActualTypes,
                 null
