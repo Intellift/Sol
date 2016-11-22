@@ -1,5 +1,6 @@
 package org.intellift.sol.controller.api;
 
+import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.domain.exception.NotFoundException;
 import org.intellift.sol.mapper.Mapper;
@@ -42,7 +43,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
 
         entity.setId(null);
 
-        final E createdEntity = getEntityService().save(entity)
+        final E createdEntity = getEntityService().create(entity)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
 
         final URI location = linkTo(getClass()).slash(createdEntity.getId()).toUri();
@@ -63,12 +64,13 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
         final Boolean exists = getEntityService().exists(id)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
 
-        final E savedEntity = getEntityService().save(entity)
-                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
+        final Try<E> persistedTryEntity = exists ? getEntityService().update(entity) : getEntityService().create(entity);
 
-        final D savedDto = getEntityMapper().mapTo(savedEntity);
+        final E persistedEntity = persistedTryEntity.getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
 
-        return new ResponseEntity<>(savedDto, exists ? HttpStatus.OK : HttpStatus.CREATED);
+        final D persistedDto = getEntityMapper().mapTo(persistedEntity);
+
+        return new ResponseEntity<>(persistedDto, exists ? HttpStatus.OK : HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")

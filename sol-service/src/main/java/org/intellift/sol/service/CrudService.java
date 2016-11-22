@@ -28,6 +28,14 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return Try.of(() -> getEntityRepository().save(entity));
     }
 
+    default Try<E> create(final E entity) {
+        return save(entity);
+    }
+
+    default Try<E> update(final E entity) {
+        return save(entity);
+    }
+
     default Try<Page<E>> findAll(final Pageable pageable) {
         return Try.of(() -> getEntityRepository().findAll(pageable));
     }
