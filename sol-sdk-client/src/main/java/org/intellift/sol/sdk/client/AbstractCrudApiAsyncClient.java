@@ -43,13 +43,12 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     @Override
-    @SafeVarargs
-    public final Future<ResponseEntity<Page<D>>> getPage(final Tuple2<String, Iterable<String>>... parameters) {
+    public final Future<ResponseEntity<Page<D>>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
         final String endpoint = getEndpoint();
 
-        final String uri = Stream.of(parameters)
+        final String uri = Stream.ofAll(parameters)
                 .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
                 .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
                 .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)))
@@ -66,13 +65,12 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     @Override
-    @SafeVarargs
-    public final Future<ResponseEntity<Page<D>>> getAll(final Tuple2<String, Iterable<String>>... parameters) {
+    public final Future<ResponseEntity<Page<D>>> getAll(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
         final String endpoint = getEndpoint();
 
-        final Stream<Tuple2<String, String>> processedQuery = Stream.of(parameters)
+        final Stream<Tuple2<String, String>> processedQuery = Stream.ofAll(parameters)
                 .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
                 .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
                 .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)));
