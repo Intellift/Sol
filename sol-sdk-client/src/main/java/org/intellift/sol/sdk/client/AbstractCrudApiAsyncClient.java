@@ -44,7 +44,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     @SafeVarargs
-    public final Future<ResponseEntity<Page<D>>> getAll(final Tuple2<String, Iterable<String>>... parameters) {
+    public final Future<ResponseEntity<Page<D>>> getPage(final Tuple2<String, Iterable<String>>... parameters) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
         final String endpoint = getEndpoint();
@@ -65,6 +65,50 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         ));
     }
 
+    @Override
+    @SafeVarargs
+    public final Future<ResponseEntity<Page<D>>> getAll(final Tuple2<String, Iterable<String>>... parameters) {
+        final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
+
+        final String endpoint = getEndpoint();
+
+        final Stream<Tuple2<String, String>> processedQuery = Stream.of(parameters)
+                .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
+                .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
+                .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)));
+
+        final String metadataQueryUri = processedQuery
+                .removeFirst(tuple -> tuple._1.equalsIgnoreCase("size"))
+                .append(Tuple.of("size", "0"))
+                .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
+                .toUriString();
+
+        return convert(
+                asyncRestOperations.exchange(
+                        metadataQueryUri,
+                        HttpMethod.GET,
+                        httpEntity,
+                        new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                        }
+                ))
+                .flatMap(pageResponseEntity -> {
+                    final String allElementsQueryUri = processedQuery
+                            .removeFirst(tuple -> tuple._1.equalsIgnoreCase("size"))
+                            .append(Tuple.of("size", String.valueOf(pageResponseEntity.getBody().getTotalElements())))
+                            .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
+                            .toUriString();
+
+                    return convert(asyncRestOperations.exchange(
+                            allElementsQueryUri,
+                            HttpMethod.GET,
+                            httpEntity,
+                            new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                            }
+                    ));
+                });
+    }
+
+    @Override
     public Future<ResponseEntity<D>> getOne(final ID id) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
@@ -78,6 +122,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         ));
     }
 
+    @Override
     public Future<ResponseEntity<D>> create(final D dto) {
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
@@ -91,6 +136,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         ));
     }
 
+    @Override
     public Future<ResponseEntity<D>> update(final D dto) {
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
@@ -104,6 +150,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         ));
     }
 
+    @Override
     public Future<ResponseEntity<Void>> delete(final ID id) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 

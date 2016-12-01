@@ -1,6 +1,7 @@
 package org.intellift.sol.sdk.client;
 
 import javaslang.Tuple2;
+import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,8 @@ import java.io.Serializable;
 public interface CrudApiAsyncClient<D extends Identifiable<ID>, ID extends Serializable> {
 
     Future<ResponseEntity<Page<D>>> getAll(Tuple2<String, Iterable<String>>... parameters);
+
+    Future<ResponseEntity<Page<D>>> getPage(Tuple2<String, Iterable<String>>... parameters);
 
     Future<ResponseEntity<D>> getOne(ID id);
 
