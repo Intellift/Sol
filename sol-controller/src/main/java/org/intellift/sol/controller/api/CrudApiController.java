@@ -2,16 +2,15 @@ package org.intellift.sol.controller.api;
 
 import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
-import org.intellift.sol.domain.exception.NotFoundException;
 import org.intellift.sol.mapper.Mapper;
 import org.intellift.sol.service.CrudService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
-import java.net.URI;
-import java.util.function.Function;
 
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
@@ -19,6 +18,10 @@ import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
 public interface CrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> {
+
+    default Logger getLogger() {
+        return LoggerFactory.getLogger(getClass());
+    }
 
     Class<E> getEntityClass();
 
@@ -28,55 +31,75 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
 
     @GetMapping("/{id}")
     default ResponseEntity<D> getOne(@PathVariable("id") final ID id) {
-        final E entity = getEntityService().findOne(id)
-                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new)
-                .getOrElseThrow(() -> new NotFoundException(getEntityClass(), "id", id));
-
-        final D dto = getEntityMapper().mapTo(entity);
-
-        return ResponseEntity.ok(dto);
+        return getEntityService().findOne(id)
+                .map(option -> option
+                        .map(entity -> getEntityMapper().mapTo(entity))
+                        .map(ResponseEntity::ok)
+                        .getOrElse(() -> ResponseEntity
+                                .status(HttpStatus.NOT_FOUND)
+                                .body(null)))
+                .onFailure(e -> getLogger().error("", e))
+                .getOrElseGet(e -> ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(null));
     }
 
     @PostMapping
     default ResponseEntity<D> post(@RequestBody final D dto) {
-        final E entity = getEntityMapper().mapFrom(dto);
-
-        entity.setId(null);
-
-        final E createdEntity = getEntityService().create(entity)
-                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
-
-        final URI location = linkTo(getClass()).slash(createdEntity.getId()).toUri();
-
-        final D createdDto = getEntityMapper().mapTo(createdEntity);
-
-        return ResponseEntity
-                .created(location)
-                .body(createdDto);
+        return Try
+                .of(() -> {
+                    final E entity = getEntityMapper().mapFrom(dto);
+                    entity.setId(null);
+                    return entity;
+                })
+                .flatMap(entity -> getEntityService().create(entity))
+                .map(createdEntity -> getEntityMapper().mapTo(createdEntity))
+                .map(createdDto -> ResponseEntity
+                        .created(linkTo(getClass()).slash(createdDto.getId()).toUri())
+                        .body(createdDto))
+                .onFailure(e -> getLogger().error("", e))
+                .getOrElseGet(e -> ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(null));
     }
 
     @PutMapping("/{id}")
     default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final D dto) {
-        final E entity = getEntityMapper().mapFrom(dto);
+        return Try
+                .of(() -> {
+                    final E entity = getEntityMapper().mapFrom(dto);
+                    entity.setId(id);
+                    return entity;
+                })
+                .flatMap(entity -> getEntityService().exists(entity.getId())
+                        .flatMap(exists -> {
+                            final Try<E> tryPersistedEntity = exists
+                                    ? getEntityService().update(entity)
+                                    : getEntityService().create(entity);
 
-        entity.setId(id);
+                            final Try<D> tryPersistedDto = tryPersistedEntity
+                                    .map(persistedEntity -> getEntityMapper().mapTo(persistedEntity));
 
-        final Boolean exists = getEntityService().exists(id)
-                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
-
-        final Try<E> persistedTryEntity = exists ? getEntityService().update(entity) : getEntityService().create(entity);
-
-        final E persistedEntity = persistedTryEntity.getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
-
-        final D persistedDto = getEntityMapper().mapTo(persistedEntity);
-
-        return new ResponseEntity<>(persistedDto, exists ? HttpStatus.OK : HttpStatus.CREATED);
+                            return tryPersistedDto
+                                    .map(persistedDto -> exists
+                                            ? ResponseEntity.status(HttpStatus.OK).body(persistedDto)
+                                            : ResponseEntity.status(HttpStatus.CREATED).body(persistedDto));
+                        }))
+                .onFailure(e -> getLogger().error("", e))
+                .getOrElseGet(e -> ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body(null));
     }
 
     @DeleteMapping("/{id}")
     default ResponseEntity<Void> delete(@PathVariable("id") final ID id) {
-        getEntityService().delete(id);
-
-        return ResponseEntity.noContent().build();
+        return getEntityService().delete(id)
+                .map(optionEntity -> ResponseEntity
+                        .noContent()
+                        .build())
+                .onFailure(e -> getLogger().error("", e))
+                .getOrElseGet(e -> ResponseEntity
+                        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .build());
     }
 }

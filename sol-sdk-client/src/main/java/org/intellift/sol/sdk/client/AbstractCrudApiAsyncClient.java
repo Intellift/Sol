@@ -3,6 +3,7 @@ package org.intellift.sol.sdk.client;
 import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.List;
+import javaslang.collection.Seq;
 import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
@@ -26,11 +27,15 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         this.asyncRestOperations = asyncRestOperations;
     }
 
-    public abstract Class<D> getDtoClass();
+    protected abstract Class<D> getDtoClass();
 
-    public abstract String getEndpoint();
+    protected abstract String getEndpoint();
 
-    public HttpHeaders getHeaders() {
+    protected String getPageSizeParameterName() {
+        return "size";
+    }
+
+    protected HttpHeaders getHeaders() {
         final HttpHeaders headers = new HttpHeaders();
 
         headers.setContentType(MediaType.APPLICATION_JSON_UTF8);
@@ -49,7 +54,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         final String endpoint = getEndpoint();
 
         final String uri = Stream.ofAll(parameters)
-                .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
+                .map(t -> Tuple.of(t._1, Stream.ofAll(t._2)))
                 .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
                 .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)))
                 .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
@@ -70,14 +75,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String endpoint = getEndpoint();
 
-        final Stream<Tuple2<String, String>> processedQuery = Stream.ofAll(parameters)
-                .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
+        final Seq<Tuple2<String, String>> processedQuery = Stream.ofAll(parameters)
+                .filter(tuple -> !tuple._1.equalsIgnoreCase(getPageSizeParameterName()))
+                .map(t -> Tuple.of(t._1, Stream.ofAll(t._2)))
                 .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
                 .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)));
 
         final String metadataQueryUri = processedQuery
-                .removeFirst(tuple -> tuple._1.equalsIgnoreCase("size"))
-                .append(Tuple.of("size", "0"))
+                .append(Tuple.of(getPageSizeParameterName(), "0"))
                 .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
                 .toUriString();
 
@@ -91,8 +96,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 ))
                 .flatMap(pageResponseEntity -> {
                     final String allElementsQueryUri = processedQuery
-                            .removeFirst(tuple -> tuple._1.equalsIgnoreCase("size"))
-                            .append(Tuple.of("size", String.valueOf(pageResponseEntity.getBody().getTotalElements())))
+                            .append(Tuple.of(getPageSizeParameterName(), String.valueOf(pageResponseEntity.getBody().getTotalElements())))
                             .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
                             .toUriString();
 
