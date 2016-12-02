@@ -27,12 +27,26 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return Try.of(() -> getEntityRepository().save(entity));
     }
 
+    default Try<Stream<E>> save(final Iterable<E> entities) {
+        return Try.of(() -> entities.iterator().hasNext()
+                ? Stream.ofAll(getEntityRepository().save(entities))
+                : Stream.empty());
+    }
+
     default Try<E> create(final E entity) {
         return save(entity);
     }
 
+    default Try<Stream<E>> create(final Iterable<E> entities) {
+        return save(entities);
+    }
+
     default Try<E> update(final E entity) {
         return save(entity);
+    }
+
+    default Try<Stream<E>> update(final Iterable<E> entities) {
+        return save(entities);
     }
 
     default Try<Stream<E>> findAll(final Sort sort) {
