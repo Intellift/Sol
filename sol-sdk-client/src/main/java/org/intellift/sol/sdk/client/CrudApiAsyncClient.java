@@ -1,7 +1,6 @@
 package org.intellift.sol.sdk.client;
 
 import javaslang.Tuple2;
-import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;

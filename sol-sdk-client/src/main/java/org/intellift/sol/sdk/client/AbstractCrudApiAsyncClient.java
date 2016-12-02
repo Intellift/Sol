@@ -2,7 +2,6 @@ package org.intellift.sol.sdk.client;
 
 import javaslang.Tuple;
 import javaslang.Tuple2;
-import javaslang.collection.List;
 import javaslang.collection.Seq;
 import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
