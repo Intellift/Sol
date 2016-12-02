@@ -8,6 +8,7 @@ import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.domain.repository.Repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
 
@@ -36,12 +37,20 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return save(entity);
     }
 
+    default Try<Stream<E>> findAll(final Sort sort) {
+        return Try.of(() -> Stream.ofAll(getEntityRepository().findAll(sort)));
+    }
+
     default Try<Page<E>> findAll(final Pageable pageable) {
         return Try.of(() -> getEntityRepository().findAll(pageable));
     }
 
     default Try<Stream<E>> findAll() {
         return Try.of(() -> Stream.ofAll(getEntityRepository().findAll()));
+    }
+
+    default Try<Stream<E>> findAll(final Iterable<ID> ids) {
+        return Try.of(() -> Stream.ofAll(getEntityRepository().findAll(ids)));
     }
 
     default Try<Option<E>> findOne(final ID id) {
