@@ -56,15 +56,8 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
 
     default Try<Option<E>> delete(final ID id) {
         return findOne(id)
-                .flatMap(e -> Try
-                        .of(() -> {
-                            if (e.isDefined()) {
-                                getEntityRepository().delete(e.get());
-                            }
-
-                            return e;
-                        })
-                );
+                .map(entity -> entity
+                        .peek(e -> getEntityRepository().delete(e)));
     }
 
     default Try<Option<E>> delete(final E entity) {
