@@ -77,10 +77,8 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
                                     ? getEntityService().update(entity)
                                     : getEntityService().create(entity);
 
-                            final Try<D> tryPersistedDto = tryPersistedEntity
-                                    .map(persistedEntity -> getEntityMapper().mapTo(persistedEntity));
-
-                            return tryPersistedDto
+                            return tryPersistedEntity
+                                    .map(persistedEntity -> getEntityMapper().mapTo(persistedEntity))
                                     .map(persistedDto -> exists
                                             ? ResponseEntity.status(HttpStatus.OK).body(persistedDto)
                                             : ResponseEntity.status(HttpStatus.CREATED).body(persistedDto));
