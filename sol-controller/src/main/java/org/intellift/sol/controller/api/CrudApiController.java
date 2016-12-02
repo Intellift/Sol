@@ -32,7 +32,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
     @GetMapping("/{id}")
     default ResponseEntity<D> getOne(@PathVariable("id") final ID id) {
         return getEntityService().findOne(id)
-                .map(option -> option
+                .map(optionEntity -> optionEntity
                         .map(entity -> getEntityMapper().mapTo(entity))
                         .map(ResponseEntity::ok)
                         .getOrElse(() -> ResponseEntity
