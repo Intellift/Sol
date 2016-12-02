@@ -23,8 +23,6 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
         return LoggerFactory.getLogger(getClass());
     }
 
-    Class<E> getEntityClass();
-
     Mapper<E, D> getEntityMapper();
 
     CrudService<E, ID> getEntityService();

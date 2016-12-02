@@ -17,8 +17,6 @@ import java.io.Serializable;
  */
 public interface CrudService<E extends Identifiable<ID>, ID extends Serializable> {
 
-    Class<E> getEntityClass();
-
     Repository<E, ID> getEntityRepository();
 
     default Try<Boolean> exists(final ID id) {
