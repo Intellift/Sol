@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
 
+import static javaslang.API.*;
+import static javaslang.Patterns.None;
+import static javaslang.Patterns.Some;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
@@ -30,12 +33,13 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
     @GetMapping("/{id}")
     default ResponseEntity<D> getOne(@PathVariable("id") final ID id) {
         return getEntityService().findOne(id)
-                .map(optionEntity -> optionEntity
-                        .map(entity -> getEntityMapper().mapTo(entity))
-                        .map(ResponseEntity::ok)
-                        .getOrElse(() -> ResponseEntity
+                .map(optionEntity -> Match(optionEntity).<ResponseEntity<D>>of(
+                        Case(Some($()), entity -> ResponseEntity
+                                .status(HttpStatus.OK)
+                                .body(getEntityMapper().mapTo(entity))),
+                        Case(None(), ResponseEntity
                                 .status(HttpStatus.NOT_FOUND)
-                                .body(null)))
+                                .body(null))))
                 .onFailure(e -> getLogger().error("Error while processing GET/{id} request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)

@@ -31,7 +31,7 @@ public interface QueryDslCrudApiController<E extends Identifiable<ID>, D extends
         return getEntityService().findAll(predicate, pageable)
                 .map(page -> getEntityMapper().mapTo(page))
                 .map(ResponseEntity::ok)
-                .onFailure(e -> getLogger().error("", e))
+                .onFailure(e -> getLogger().error("Error while processing GET request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));

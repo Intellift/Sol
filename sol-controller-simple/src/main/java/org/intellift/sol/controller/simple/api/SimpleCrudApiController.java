@@ -24,7 +24,7 @@ public interface SimpleCrudApiController<E extends Identifiable<ID>, D extends I
         return getEntityService().findAll(pageable)
                 .map(page -> getEntityMapper().mapTo(page))
                 .map(ResponseEntity::ok)
-                .onFailure(e -> getLogger().error("", e))
+                .onFailure(e -> getLogger().error("Error while processing GET request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
