@@ -13,6 +13,8 @@ import java.io.Serializable;
  */
 public interface CrudApiAsyncClient<D extends Identifiable<ID>, ID extends Serializable> {
 
+    Future<ResponseEntity<Page<D>>> getAll();
+
     Future<ResponseEntity<Page<D>>> getAll(Iterable<Tuple2<String, Iterable<String>>> parameters);
 
     Future<ResponseEntity<Page<D>>> getPage(Iterable<Tuple2<String, Iterable<String>>> parameters);

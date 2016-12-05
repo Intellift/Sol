@@ -2,6 +2,7 @@ package org.intellift.sol.sdk.client;
 
 import javaslang.Tuple;
 import javaslang.Tuple2;
+import javaslang.collection.List;
 import javaslang.collection.Seq;
 import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
@@ -69,6 +70,11 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     @Override
+    public final Future<ResponseEntity<Page<D>>> getAll() {
+        return getAll(List.empty());
+    }
+
+    @Override
     public final Future<ResponseEntity<Page<D>>> getAll(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
@@ -95,7 +101,8 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 ))
                 .flatMap(pageResponseEntity -> {
                     final String allElementsQueryUri = processedQuery
-                            .append(Tuple.of(getPageSizeParameterName(), String.valueOf(pageResponseEntity.getBody().getTotalElements())))
+                            .append(Tuple.of(getPageSizeParameterName(), String.valueOf(pageResponseEntity.getBody()
+                                    .getTotalElements())))
                             .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
                             .toUriString();
 
@@ -112,7 +119,6 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     @Override
     public Future<ResponseEntity<D>> getOne(final ID id) {
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
-
         final String uri = String.join("/", getEndpoint(), String.valueOf(id));
 
         return convert(asyncRestOperations.exchange(
