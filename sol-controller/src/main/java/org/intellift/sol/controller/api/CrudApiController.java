@@ -36,7 +36,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
                         .getOrElse(() -> ResponseEntity
                                 .status(HttpStatus.NOT_FOUND)
                                 .body(null)))
-                .onFailure(e -> getLogger().error("", e))
+                .onFailure(e -> getLogger().error("Error while processing GET/{id} request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
@@ -55,7 +55,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
                 .map(createdDto -> ResponseEntity
                         .created(linkTo(getClass()).slash(createdDto.getId()).toUri())
                         .body(createdDto))
-                .onFailure(e -> getLogger().error("", e))
+                .onFailure(e -> getLogger().error("Error while processing POST request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
@@ -81,7 +81,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
                                             ? ResponseEntity.status(HttpStatus.OK).body(persistedDto)
                                             : ResponseEntity.status(HttpStatus.CREATED).body(persistedDto));
                         }))
-                .onFailure(e -> getLogger().error("", e))
+                .onFailure(e -> getLogger().error("Error while processing PUT request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
@@ -93,7 +93,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
                 .map(optionEntity -> ResponseEntity
                         .noContent()
                         .build())
-                .onFailure(e -> getLogger().error("", e))
+                .onFailure(e -> getLogger().error("Error while processing DELETE request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .build());
