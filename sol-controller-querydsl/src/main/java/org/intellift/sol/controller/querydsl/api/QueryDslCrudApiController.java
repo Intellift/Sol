@@ -27,7 +27,7 @@ public interface QueryDslCrudApiController<E extends Identifiable<ID>, D extends
     @GetMapping
     ResponseEntity<Page<D>> getAll(Predicate predicate, Pageable pageable);
 
-    default ResponseEntity<Page<D>> getAllDefaultImplementation(Predicate predicate, Pageable pageable) {
+    default ResponseEntity<Page<D>> getAllDefaultImplementation(final Predicate predicate, final Pageable pageable) {
         return getEntityService().findAll(predicate, pageable)
                 .map(page -> getEntityMapper().mapTo(page))
                 .map(ResponseEntity::ok)

@@ -19,7 +19,7 @@ public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Seri
     @Override
     QueryDslRepository<E, ID> getEntityRepository();
 
-    default Try<Page<E>> findAll(Predicate predicate, Pageable pageable) {
+    default Try<Page<E>> findAll(final Predicate predicate, final Pageable pageable) {
         return Try.of(() -> getEntityRepository().findAll(predicate, pageable));
     }
 }

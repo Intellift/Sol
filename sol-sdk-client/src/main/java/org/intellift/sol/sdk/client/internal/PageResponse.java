@@ -11,11 +11,11 @@ import java.util.List;
  */
 public class PageResponse<D> extends PageImpl<D> {
 
-    public PageResponse(List<D> content, Pageable pageable, long total) {
+    public PageResponse(final List<D> content, final Pageable pageable, final long total) {
         super(content, pageable, total);
     }
 
-    public PageResponse(List<D> content) {
+    public PageResponse(final List<D> content) {
         super(content);
     }
 

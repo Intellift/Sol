@@ -12,7 +12,7 @@ public class PageResponseTypeReference<T> extends ParameterizedTypeReference<T> 
 
     private final Class<?> dtoClass;
 
-    public PageResponseTypeReference(Class<?> dtoClass) {
+    public PageResponseTypeReference(final Class<?> dtoClass) {
         this.dtoClass = dtoClass;
     }
 
