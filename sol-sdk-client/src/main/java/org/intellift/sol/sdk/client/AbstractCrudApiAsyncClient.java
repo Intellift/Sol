@@ -14,6 +14,7 @@ import org.springframework.web.client.AsyncRestOperations;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.io.Serializable;
+import java.util.Objects;
 
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
@@ -43,11 +44,15 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     protected <T> Future<T> convert(final ListenableFuture<T> listenableFuture) {
+        Objects.requireNonNull(listenableFuture, "listenableFuture is null");
+
         return Future.fromJavaFuture(listenableFuture);
     }
 
     @Override
     public final Future<ResponseEntity<Page<D>>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+        Objects.requireNonNull(parameters, "parameters is null");
+
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
         final String endpoint = getEndpoint();
@@ -75,6 +80,8 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public final Future<ResponseEntity<Page<D>>> getAll(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+        Objects.requireNonNull(parameters, "parameters is null");
+
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
         final String endpoint = getEndpoint();
@@ -117,6 +124,8 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public Future<ResponseEntity<D>> getOne(final ID id) {
+        Objects.requireNonNull(id, "id is null");
+
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
         final String uri = String.join("/", getEndpoint(), String.valueOf(id));
 
@@ -130,6 +139,8 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public Future<ResponseEntity<D>> create(final D dto) {
+        Objects.requireNonNull(dto, "dto is null");
+
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
         final String uri = getEndpoint();
@@ -144,6 +155,8 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public Future<ResponseEntity<D>> update(final D dto) {
+        Objects.requireNonNull(dto, "dto is null");
+
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
         final String uri = String.join("/", getEndpoint(), String.valueOf(dto.getId()));
@@ -158,6 +171,8 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public Future<ResponseEntity<Void>> delete(final ID id) {
+        Objects.requireNonNull(id, "id is null");
+
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
         final String uri = String.join("/", getEndpoint(), String.valueOf(id));

@@ -12,8 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
-
-import static java.util.Objects.requireNonNull;
+import java.util.Objects;
 
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
@@ -23,9 +22,9 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     Repository<E, ID> getEntityRepository();
 
     default Try<Boolean> exists(final ID id) {
-        return Try
-                .of(() -> requireNonNull(id, "Id to check if exists must not be null"))
-                .map(notNullId -> getEntityRepository().exists(notNullId));
+        Objects.requireNonNull(id, "id is null");
+
+        return Try.of(() -> getEntityRepository().exists(id));
     }
 
     default Try<Long> count() {
@@ -33,17 +32,17 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     }
 
     default Try<E> save(final E entity) {
-        return Try
-                .of(() -> requireNonNull(entity, "Entity to save must not be null"))
-                .map(notNullEntity -> getEntityRepository().save(notNullEntity));
+        Objects.requireNonNull(entity, "entity is null");
+
+        return Try.of(() -> getEntityRepository().save(entity));
     }
 
     default Try<List<E>> save(final Iterable<E> entities) {
-        return Try
-                .of(() -> requireNonNull(entities, "Entities to save must not be null"))
-                .map(iterable -> iterable.iterator().hasNext()
-                        ? List.ofAll(getEntityRepository().save(iterable))
-                        : List.empty());
+        Objects.requireNonNull(entities, "entities is null");
+
+        return Try.of(() -> entities.iterator().hasNext()
+                ? List.ofAll(getEntityRepository().save(entities))
+                : List.empty());
     }
 
     default Try<E> create(final E entity) {
@@ -63,15 +62,15 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     }
 
     default Try<Stream<E>> findAll(final Sort sort) {
-        return Try
-                .of(() -> requireNonNull(sort, "Sort must not be null"))
-                .map(notNullSort -> Stream.ofAll(getEntityRepository().findAll(notNullSort)));
+        Objects.requireNonNull(sort, "sort is null");
+
+        return Try.of(() -> Stream.ofAll(getEntityRepository().findAll(sort)));
     }
 
     default Try<Page<E>> findAll(final Pageable pageable) {
-        return Try
-                .of(() -> requireNonNull(pageable, "Pageable must not be null"))
-                .map(notNullPageable -> getEntityRepository().findAll(notNullPageable));
+        Objects.requireNonNull(pageable, "pageable is null");
+
+        return Try.of(() -> getEntityRepository().findAll(pageable));
     }
 
     default Try<Stream<E>> findAll() {
@@ -79,42 +78,41 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     }
 
     default Try<List<E>> findAll(final Iterable<ID> ids) {
-        return Try
-                .of(() -> requireNonNull(ids, "Ids to find must not be null"))
-                .map(iterable -> List.ofAll(getEntityRepository().findAll(iterable)));
+        Objects.requireNonNull(ids, "ids is null");
+
+        return Try.of(() -> List.ofAll(getEntityRepository().findAll(ids)));
     }
 
     default Try<Option<E>> findOne(final ID id) {
-        return Try
-                .of(() -> requireNonNull(id, "Id to find must not be null"))
-                .map(notNullId -> Option.of(getEntityRepository().findOne(notNullId)));
+        Objects.requireNonNull(id, "id is null");
+
+        return Try.of(() -> Option.of(getEntityRepository().findOne(id)));
     }
 
     default Try<Option<E>> findOne(final E entity) {
-        return Try
-                .of(() -> requireNonNull(entity, "Entity to find must not be null"))
-                .flatMap(this::findOne);
+        Objects.requireNonNull(entity, "entity is null");
+
+        return findOne(entity.getId());
     }
 
     default Try<Option<E>> delete(final ID id) {
-        return Try
-                .of(() -> requireNonNull(id, "Id to delete must not be null"))
-                .flatMap(this::findOne)
+        Objects.requireNonNull(id, "id is null");
+
+        return findOne(id)
                 .peek(entity -> entity
                         .peek(e -> getEntityRepository().delete(e)));
     }
 
     default Try<Option<E>> delete(final E entity) {
-        return Try
-                .of(() -> requireNonNull(entity, "Entity to delete must not be null"))
-                .map(Identifiable::getId)
-                .flatMap(this::delete);
+        Objects.requireNonNull(entity, "entity is null");
+
+        return delete(entity.getId());
     }
 
     default Try<List<E>> delete(final Iterable<ID> ids) {
-        return Try
-                .of(() -> requireNonNull(ids, "Ids to delete must not be null"))
-                .flatMap(this::findAll)
+        Objects.requireNonNull(ids, "ids is null");
+
+        return findAll(ids)
                 .peek(entities -> {
                     if (entities.nonEmpty()) {
                         getEntityRepository().delete(entities);
