@@ -12,9 +12,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.Serializable;
 
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static javaslang.API.*;
 import static javaslang.Patterns.None;
 import static javaslang.Patterns.Some;
+import static javaslang.Predicates.is;
 import static org.springframework.hateoas.mvc.ControllerLinkBuilder.linkTo;
 
 /**
@@ -74,17 +77,18 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
                     return entity;
                 })
                 .flatMap(entity -> getEntityService().exists(entity.getId())
-                        .flatMap(exists -> {
-                            final Try<E> tryPersistedEntity = exists
-                                    ? getEntityService().update(entity)
-                                    : getEntityService().create(entity);
-
-                            return tryPersistedEntity
-                                    .map(persistedEntity -> getEntityMapper().mapTo(persistedEntity))
-                                    .map(persistedDto -> exists
-                                            ? ResponseEntity.status(HttpStatus.OK).body(persistedDto)
-                                            : ResponseEntity.status(HttpStatus.CREATED).body(persistedDto));
-                        }))
+                        .flatMap(exists -> Match(exists).of(
+                                Case(is(TRUE), getEntityService().update(entity)
+                                        .map(persistedEntity -> getEntityMapper().mapTo(persistedEntity))
+                                        .map(persistedDto -> ResponseEntity
+                                                .status(HttpStatus.OK)
+                                                .body(persistedDto))),
+                                Case(is(FALSE), getEntityService().create(entity)
+                                        .map(persistedEntity -> getEntityMapper().mapTo(persistedEntity))
+                                        .map(persistedDto -> ResponseEntity
+                                                .status(HttpStatus.CREATED)
+                                                .body(persistedDto)))
+                        )))
                 .onFailure(e -> getLogger().error("Error while processing PUT request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
