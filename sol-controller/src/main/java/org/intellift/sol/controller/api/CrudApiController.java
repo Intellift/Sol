@@ -87,8 +87,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
                                         .map(persistedEntity -> getEntityMapper().mapTo(persistedEntity))
                                         .map(persistedDto -> ResponseEntity
                                                 .status(HttpStatus.CREATED)
-                                                .body(persistedDto)))
-                        )))
+                                                .body(persistedDto))))))
                 .onFailure(e -> getLogger().error("Error while processing PUT request", e))
                 .getOrElseGet(e -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
