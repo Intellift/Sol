@@ -1,5 +1,6 @@
 package org.intellift.sol.controller.simple.api;
 
+import org.intellift.sol.controller.api.AsymmetricCrudApiController;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.mapper.PageMapper;
 import org.springframework.data.domain.Page;
@@ -13,12 +14,13 @@ import java.io.Serializable;
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
-public interface SimpleCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> extends SimpleAsymmetricCrudApiController<E, D, D, ID> {
+public interface SimpleAsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, L extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, L, ID> {
 
     @Override
-    default PageMapper<E, D> getReferenceMapper() {
-        return getMapper();
-    }
+    PageMapper<E, D> getMapper();
+
+    @Override
+    PageMapper<E, L> getReferenceMapper();
 
     @GetMapping
     default ResponseEntity<Page<D>> getAll(final Pageable pageable) {

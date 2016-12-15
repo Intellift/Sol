@@ -19,29 +19,29 @@ import java.util.Objects;
  */
 public interface CrudService<E extends Identifiable<ID>, ID extends Serializable> {
 
-    Repository<E, ID> getEntityRepository();
+    Repository<E, ID> getRepository();
 
     default Try<Boolean> exists(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        return Try.of(() -> getEntityRepository().exists(id));
+        return Try.of(() -> getRepository().exists(id));
     }
 
     default Try<Long> count() {
-        return Try.of(() -> getEntityRepository().count());
+        return Try.of(() -> getRepository().count());
     }
 
     default Try<E> save(final E entity) {
         Objects.requireNonNull(entity, "entity is null");
 
-        return Try.of(() -> getEntityRepository().save(entity));
+        return Try.of(() -> getRepository().save(entity));
     }
 
     default Try<List<E>> save(final Iterable<E> entities) {
         Objects.requireNonNull(entities, "entities is null");
 
         return Try.of(() -> entities.iterator().hasNext()
-                ? List.ofAll(getEntityRepository().save(entities))
+                ? List.ofAll(getRepository().save(entities))
                 : List.empty());
     }
 
@@ -64,29 +64,29 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Stream<E>> findAll(final Sort sort) {
         Objects.requireNonNull(sort, "sort is null");
 
-        return Try.of(() -> Stream.ofAll(getEntityRepository().findAll(sort)));
+        return Try.of(() -> Stream.ofAll(getRepository().findAll(sort)));
     }
 
     default Try<Page<E>> findAll(final Pageable pageable) {
         Objects.requireNonNull(pageable, "pageable is null");
 
-        return Try.of(() -> getEntityRepository().findAll(pageable));
+        return Try.of(() -> getRepository().findAll(pageable));
     }
 
     default Try<Stream<E>> findAll() {
-        return Try.of(() -> Stream.ofAll(getEntityRepository().findAll()));
+        return Try.of(() -> Stream.ofAll(getRepository().findAll()));
     }
 
     default Try<List<E>> findAll(final Iterable<ID> ids) {
         Objects.requireNonNull(ids, "ids is null");
 
-        return Try.of(() -> List.ofAll(getEntityRepository().findAll(ids)));
+        return Try.of(() -> List.ofAll(getRepository().findAll(ids)));
     }
 
     default Try<Option<E>> findOne(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        return Try.of(() -> Option.of(getEntityRepository().findOne(id)));
+        return Try.of(() -> Option.of(getRepository().findOne(id)));
     }
 
     default Try<Option<E>> findOne(final E entity) {
@@ -100,7 +100,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
 
         return findOne(id)
                 .peek(entity -> entity
-                        .peek(e -> getEntityRepository().delete(e)));
+                        .peek(e -> getRepository().delete(e)));
     }
 
     default Try<Option<E>> delete(final E entity) {
@@ -115,7 +115,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return findAll(ids)
                 .peek(entities -> {
                     if (entities.nonEmpty()) {
-                        getEntityRepository().delete(entities);
+                        getRepository().delete(entities);
                     }
                 });
     }
