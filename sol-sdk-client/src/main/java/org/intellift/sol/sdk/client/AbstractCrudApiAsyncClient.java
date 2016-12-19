@@ -106,19 +106,23 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                         }
                 ))
                 .flatMap(pageResponseEntity -> {
-                    final String allElementsQueryUri = processedQuery
-                            .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(pageResponseEntity.getBody()
-                                    .getTotalElements())))
-                            .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
-                            .toUriString();
+                    if (pageResponseEntity.getBody().getTotalElements() <= pageResponseEntity.getBody().getSize()) {
+                        return Future.successful(pageResponseEntity);
+                    } else {
+                        final String allElementsQueryUri = processedQuery
+                                .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(pageResponseEntity.getBody()
+                                        .getTotalElements())))
+                                .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
+                                .toUriString();
 
-                    return convert(asyncRestOperations.exchange(
-                            allElementsQueryUri,
-                            HttpMethod.GET,
-                            httpEntity,
-                            new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                            }
-                    ));
+                        return convert(asyncRestOperations.exchange(
+                                allElementsQueryUri,
+                                HttpMethod.GET,
+                                httpEntity,
+                                new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                                }
+                        ));
+                    }
                 });
     }
 
