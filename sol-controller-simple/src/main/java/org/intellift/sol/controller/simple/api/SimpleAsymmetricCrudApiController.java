@@ -14,13 +14,13 @@ import java.io.Serializable;
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
-public interface SimpleAsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, L extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, L, ID> {
+public interface SimpleAsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, RD extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, RD, ID> {
 
     @Override
     PageMapper<E, D> getMapper();
 
     @Override
-    PageMapper<E, L> getReferenceMapper();
+    PageMapper<E, RD> getReferenceMapper();
 
     @GetMapping
     default ResponseEntity<Page<D>> getAll(final Pageable pageable) {
