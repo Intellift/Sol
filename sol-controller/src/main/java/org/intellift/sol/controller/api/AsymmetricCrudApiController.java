@@ -38,15 +38,15 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     @GetMapping("/{id}")
     default ResponseEntity<D> getOne(@PathVariable("id") final ID id) {
         return getService().findOne(id)
-                .map(optionEntity -> Match(optionEntity).<ResponseEntity<D>>of(
+                .map(optionalEntity -> Match(optionalEntity).<ResponseEntity<D>>of(
                         Case(Some($()), entity -> ResponseEntity
                                 .status(HttpStatus.OK)
                                 .body(getMapper().mapTo(entity))),
                         Case(None(), ResponseEntity
                                 .status(HttpStatus.NOT_FOUND)
                                 .body(null))))
-                .onFailure(e -> getLogger().error("Error while processing GET/{id} request", e))
-                .getOrElseGet(e -> ResponseEntity
+                .onFailure(throwable -> getLogger().error("Error occurred while processing GET/{id} request", throwable))
+                .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
     }
@@ -64,8 +64,8 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
                 .map(createdDto -> ResponseEntity
                         .created(linkTo(getClass()).slash(createdDto.getId()).toUri())
                         .body(createdDto))
-                .onFailure(e -> getLogger().error("Error while processing POST request", e))
-                .getOrElseGet(e -> ResponseEntity
+                .onFailure(throwable -> getLogger().error("Error occurred while processing POST request", throwable))
+                .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
     }
@@ -80,18 +80,18 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
                 })
                 .flatMap(entity -> getService().exists(entity.getId())
                         .flatMap(exists -> Match(exists).of(
-                                Case(is(TRUE), getService().update(entity)
+                                Case(is(TRUE), () -> getService().update(entity)
                                         .map(persistedEntity -> getMapper().mapTo(persistedEntity))
                                         .map(persistedDto -> ResponseEntity
                                                 .status(HttpStatus.OK)
                                                 .body(persistedDto))),
-                                Case(is(FALSE), getService().create(entity)
+                                Case(is(FALSE), () -> getService().create(entity)
                                         .map(persistedEntity -> getMapper().mapTo(persistedEntity))
                                         .map(persistedDto -> ResponseEntity
                                                 .status(HttpStatus.CREATED)
                                                 .body(persistedDto))))))
-                .onFailure(e -> getLogger().error("Error while processing PUT request", e))
-                .getOrElseGet(e -> ResponseEntity
+                .onFailure(throwable -> getLogger().error("Error occurred while processing PUT request", throwable))
+                .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
     }
@@ -99,11 +99,11 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     @DeleteMapping("/{id}")
     default ResponseEntity<Void> delete(@PathVariable("id") final ID id) {
         return getService().delete(id)
-                .map(optionEntity -> ResponseEntity
+                .map(optionalEntity -> ResponseEntity
                         .noContent()
-                        .build())
-                .onFailure(e -> getLogger().error("Error while processing DELETE request", e))
-                .getOrElseGet(e -> ResponseEntity
+                        .<Void>build())
+                .onFailure(throwable -> getLogger().error("Error occurred while processing DELETE request", throwable))
+                .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .build());
     }

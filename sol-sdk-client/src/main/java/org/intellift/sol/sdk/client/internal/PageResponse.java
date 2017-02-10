@@ -13,17 +13,26 @@ import java.util.List;
  */
 public class PageResponse<D> extends PageImpl<D> {
 
-    private static final long serialVersionUID = 1L;
     private int number;
+
     private int size;
+
     private int totalPages;
+
     private int numberOfElements;
+
     private long totalElements;
+
     private boolean previousPage;
+
     private boolean firstPage;
+
     private boolean nextPage;
+
     private boolean lastPage;
+
     private List<D> content;
+
     private Sort sort;
 
     public PageResponse() {
@@ -126,7 +135,10 @@ public class PageResponse<D> extends PageImpl<D> {
     }
 
     public Page<D> pageImpl() {
-        return new PageImpl<>(getContent(), new PageRequest(getNumber(),
-                getSize(), getSort()), getTotalElements());
+        return new PageImpl<>(
+                getContent(),
+                new PageRequest(getNumber(), getSize(), getSort()),
+                getTotalElements()
+        );
     }
 }

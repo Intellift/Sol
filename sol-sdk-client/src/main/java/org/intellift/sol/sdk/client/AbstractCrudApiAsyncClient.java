@@ -49,6 +49,17 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         return Future.fromJavaFuture(listenableFuture);
     }
 
+    protected List<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+        Objects.requireNonNull(parameters, "parameters is null");
+
+        return List.ofAll(parameters)
+                .map(parameterNameValues -> Tuple.of(parameterNameValues._1, List.ofAll(parameterNameValues._2)))
+                .map(parameterNameValues -> parameterNameValues._2.size() > 1
+                        ? Tuple.of(parameterNameValues._1 + "[]", parameterNameValues._2)
+                        : parameterNameValues)
+                .flatMap(parameterNameValues -> parameterNameValues._2.map(value -> Tuple.of(parameterNameValues._1, value)));
+    }
+
     @Override
     public final Future<ResponseEntity<Page<D>>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
@@ -57,20 +68,21 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String endpoint = getEndpoint();
 
-        final String uri = List.ofAll(parameters)
-                .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
-                .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
-                .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)))
-                .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
+        final String uri = flattenParameterValues(parameters)
+                .foldLeft(
+                        UriComponentsBuilder.fromUriString(endpoint),
+                        (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
                 .toUriString();
 
-        return convert(asyncRestOperations.exchange(
+        final ListenableFuture<ResponseEntity<Page<D>>> listenableFuture = asyncRestOperations.exchange(
                 uri,
                 HttpMethod.GET,
                 httpEntity,
                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                 }
-        ));
+        );
+
+        return convert(listenableFuture);
     }
 
     @Override
@@ -86,42 +98,47 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String endpoint = getEndpoint();
 
-        final Seq<Tuple2<String, String>> processedQuery = List.ofAll(parameters)
-                .filter(tuple -> !tuple._1.equalsIgnoreCase(getPageSizeParameterName()))
-                .map(t -> Tuple.of(t._1, List.ofAll(t._2)))
-                .map(t -> t._2.size() > 1 ? Tuple.of(t._1 + "[]", t._2) : t)
-                .flatMap(t -> t._2.map(value -> Tuple.of(t._1, value)));
+        final Seq<Tuple2<String, String>> processedQuery = flattenParameterValues(parameters)
+                .filter(parameterNameValues -> !parameterNameValues._1.equalsIgnoreCase(getPageSizeParameterName()));
 
         final String metadataQueryUri = processedQuery
                 .prepend(Tuple.of(getPageSizeParameterName(), "0"))
-                .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
+                .foldLeft(
+                        UriComponentsBuilder.fromUriString(endpoint),
+                        (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
                 .toUriString();
 
-        return convert(
-                asyncRestOperations.exchange(
-                        metadataQueryUri,
-                        HttpMethod.GET,
-                        httpEntity,
-                        new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                        }
-                ))
+        final ListenableFuture<ResponseEntity<Page<D>>> listenableFuture1 = asyncRestOperations.exchange(
+                metadataQueryUri,
+                HttpMethod.GET,
+                httpEntity,
+                new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                }
+        );
+
+        return convert(listenableFuture1)
                 .flatMap(pageResponseEntity -> {
                     if (pageResponseEntity.getBody().getTotalElements() <= pageResponseEntity.getBody().getSize()) {
                         return Future.successful(pageResponseEntity);
                     } else {
                         final String allElementsQueryUri = processedQuery
-                                .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(pageResponseEntity.getBody()
-                                        .getTotalElements())))
-                                .foldLeft(UriComponentsBuilder.fromUriString(endpoint), (builder, t) -> builder.queryParam(t._1, t._2))
+                                .prepend(Tuple.of(
+                                        getPageSizeParameterName(),
+                                        String.valueOf(pageResponseEntity.getBody().getTotalElements())))
+                                .foldLeft(
+                                        UriComponentsBuilder.fromUriString(endpoint),
+                                        (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
                                 .toUriString();
 
-                        return convert(asyncRestOperations.exchange(
+                        final ListenableFuture<ResponseEntity<Page<D>>> listenableFuture2 = asyncRestOperations.exchange(
                                 allElementsQueryUri,
                                 HttpMethod.GET,
                                 httpEntity,
                                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                                 }
-                        ));
+                        );
+
+                        return convert(listenableFuture2);
                     }
                 });
     }
@@ -133,12 +150,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
         final String uri = String.join("/", getEndpoint(), String.valueOf(id));
 
-        return convert(asyncRestOperations.exchange(
+        final ListenableFuture<ResponseEntity<D>> listenableFuture = asyncRestOperations.exchange(
                 uri,
                 HttpMethod.GET,
                 httpEntity,
                 getDtoClass()
-        ));
+        );
+
+        return convert(listenableFuture);
     }
 
     @Override
@@ -149,12 +168,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String uri = getEndpoint();
 
-        return convert(asyncRestOperations.exchange(
+        final ListenableFuture<ResponseEntity<D>> listenableFuture = asyncRestOperations.exchange(
                 uri,
                 HttpMethod.POST,
                 httpEntity,
                 getDtoClass()
-        ));
+        );
+
+        return convert(listenableFuture);
     }
 
     @Override
@@ -165,12 +186,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String uri = String.join("/", getEndpoint(), String.valueOf(dto.getId()));
 
-        return convert(asyncRestOperations.exchange(
+        final ListenableFuture<ResponseEntity<D>> listenableFuture = asyncRestOperations.exchange(
                 uri,
                 HttpMethod.PUT,
                 httpEntity,
                 getDtoClass()
-        ));
+        );
+
+        return convert(listenableFuture);
     }
 
     @Override
@@ -181,11 +204,13 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String uri = String.join("/", getEndpoint(), String.valueOf(id));
 
-        return convert(asyncRestOperations.exchange(
+        final ListenableFuture<ResponseEntity<Void>> listenableFuture = asyncRestOperations.exchange(
                 uri,
                 HttpMethod.DELETE,
                 httpEntity,
                 Void.class
-        ));
+        );
+
+        return convert(listenableFuture);
     }
 }

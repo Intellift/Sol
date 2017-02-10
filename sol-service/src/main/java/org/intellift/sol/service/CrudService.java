@@ -99,8 +99,8 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         Objects.requireNonNull(id, "id is null");
 
         return findOne(id)
-                .peek(entity -> entity
-                        .peek(e -> getRepository().delete(e)));
+                .peek(optionalEntity -> optionalEntity
+                        .peek(entity -> getRepository().delete(entity)));
     }
 
     default Try<Option<E>> delete(final E entity) {
@@ -113,7 +113,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         Objects.requireNonNull(ids, "ids is null");
 
         return findAll(ids)
-                .peek(entities -> {
+                .andThenTry(entities -> {
                     if (entities.nonEmpty()) {
                         getRepository().delete(entities);
                     }

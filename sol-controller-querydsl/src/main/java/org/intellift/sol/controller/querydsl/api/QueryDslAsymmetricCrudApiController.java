@@ -34,8 +34,8 @@ public interface QueryDslAsymmetricCrudApiController<E extends Identifiable<ID>,
         return getService().findAll(predicate, pageable)
                 .map(page -> getMapper().mapTo(page))
                 .map(ResponseEntity::ok)
-                .onFailure(e -> getLogger().error("Error while processing GET request", e))
-                .getOrElseGet(e -> ResponseEntity
+                .onFailure(throwable -> getLogger().error("Error occurred while processing GET request", throwable))
+                .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
     }

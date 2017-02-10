@@ -27,8 +27,8 @@ public interface SimpleAsymmetricCrudApiController<E extends Identifiable<ID>, D
         return getService().findAll(pageable)
                 .map(page -> getMapper().mapTo(page))
                 .map(ResponseEntity::ok)
-                .onFailure(e -> getLogger().error("Error while processing GET request", e))
-                .getOrElseGet(e -> ResponseEntity
+                .onFailure(throwable -> getLogger().error("Error occurred while processing GET request", throwable))
+                .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
                         .body(null));
     }
