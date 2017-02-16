@@ -118,13 +118,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         return convert(listenableFuture1)
                 .flatMap(pageResponseEntity -> {
-                    if (pageResponseEntity.getBody().getTotalElements() <= pageResponseEntity.getBody().getSize()) {
+                    final Long totalElements = pageResponseEntity.getBody().getTotalElements();
+                    final Integer pageSize = pageResponseEntity.getBody().getSize();
+
+                    if (totalElements <= pageSize) {
                         return Future.successful(pageResponseEntity);
                     } else {
                         final String allElementsQueryUri = processedQuery
-                                .prepend(Tuple.of(
-                                        getPageSizeParameterName(),
-                                        String.valueOf(pageResponseEntity.getBody().getTotalElements())))
+                                .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                                 .foldLeft(
                                         UriComponentsBuilder.fromUriString(endpoint),
                                         (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
