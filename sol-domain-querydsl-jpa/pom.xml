@@ -9,19 +9,19 @@
     <parent>
         <groupId>org.intellift.sol</groupId>
         <artifactId>sol-parent</artifactId>
-        <version>0.3.1</version>
+        <version>0.4.0-SNAPSHOT</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-domain-querydsl</artifactId>
-            <version>0.3.1</version>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-domain-jpa</artifactId>
-            <version>0.3.1</version>
+            <version>0.4.0-SNAPSHOT</version>
         </dependency>
 
         <dependency>

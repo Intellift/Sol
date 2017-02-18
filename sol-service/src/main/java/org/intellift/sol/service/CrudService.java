@@ -1,7 +1,6 @@
 package org.intellift.sol.service;
 
 
-import javaslang.collection.List;
 import javaslang.collection.Stream;
 import javaslang.control.Option;
 import javaslang.control.Try;
@@ -37,28 +36,16 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return Try.of(() -> getRepository().save(entity));
     }
 
-    default Try<List<E>> save(final Iterable<E> entities) {
-        Objects.requireNonNull(entities, "entities is null");
-
-        return Try.of(() -> entities.iterator().hasNext()
-                ? List.ofAll(getRepository().save(entities))
-                : List.empty());
-    }
-
     default Try<E> create(final E entity) {
-        return save(entity);
-    }
+        Objects.requireNonNull(entity, "entity is null");
 
-    default Try<List<E>> create(final Iterable<E> entities) {
-        return save(entities);
+        return save(entity);
     }
 
     default Try<E> update(final E entity) {
-        return save(entity);
-    }
+        Objects.requireNonNull(entity, "entity is null");
 
-    default Try<List<E>> update(final Iterable<E> entities) {
-        return save(entities);
+        return save(entity);
     }
 
     default Try<Stream<E>> findAll(final Sort sort) {
@@ -77,12 +64,6 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return Try.of(() -> Stream.ofAll(getRepository().findAll()));
     }
 
-    default Try<List<E>> findAll(final Iterable<ID> ids) {
-        Objects.requireNonNull(ids, "ids is null");
-
-        return Try.of(() -> List.ofAll(getRepository().findAll(ids)));
-    }
-
     default Try<Option<E>> findOne(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
@@ -95,28 +76,15 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return findOne(entity.getId());
     }
 
-    default Try<Option<E>> delete(final ID id) {
+    default Try<Void> delete(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        return findOne(id)
-                .peek(optionalEntity -> optionalEntity
-                        .peek(entity -> getRepository().delete(entity)));
+        return Try.run(() -> getRepository().delete(id));
     }
 
-    default Try<Option<E>> delete(final E entity) {
+    default Try<Void> delete(final E entity) {
         Objects.requireNonNull(entity, "entity is null");
 
         return delete(entity.getId());
-    }
-
-    default Try<List<E>> delete(final Iterable<ID> ids) {
-        Objects.requireNonNull(ids, "ids is null");
-
-        return findAll(ids)
-                .andThenTry(entities -> {
-                    if (entities.nonEmpty()) {
-                        getRepository().delete(entities);
-                    }
-                });
     }
 }

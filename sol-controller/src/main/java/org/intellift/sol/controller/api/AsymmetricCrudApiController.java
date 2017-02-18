@@ -99,7 +99,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     @DeleteMapping("/{id}")
     default ResponseEntity<Void> delete(@PathVariable("id") final ID id) {
         return getService().delete(id)
-                .map(optionalEntity -> ResponseEntity
+                .map(ignored -> ResponseEntity
                         .noContent()
                         .<Void>build())
                 .onFailure(throwable -> getLogger().error("Error occurred while processing DELETE request", throwable))
