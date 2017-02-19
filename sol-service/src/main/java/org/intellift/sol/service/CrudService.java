@@ -1,7 +1,7 @@
 package org.intellift.sol.service;
 
 
-import javaslang.collection.List;
+import javaslang.collection.Iterator;
 import javaslang.collection.Seq;
 import javaslang.collection.Stream;
 import javaslang.control.Option;
@@ -41,7 +41,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Seq<E>> save(final Iterable<E> entities) {
         Objects.requireNonNull(entities, "entities is null");
 
-        return List.ofAll(entities)
+        return Iterator.ofAll(entities)
                 .map(this::save)
                 .transform(Try::sequence);
     }
@@ -53,6 +53,8 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     }
 
     default Try<Seq<E>> create(final Iterable<E> entities) {
+        Objects.requireNonNull(entities, "entities is null");
+
         return save(entities);
     }
 
@@ -87,7 +89,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Seq<E>> findAll(final Iterable<ID> ids) {
         Objects.requireNonNull(ids, "ids is null");
 
-        return List.ofAll(ids)
+        return Iterator.ofAll(ids)
                 .map(this::findOne)
                 .transform(Try::sequence)
                 .map(sequence -> sequence
@@ -122,7 +124,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Void> delete(final Iterable<ID> ids) {
         Objects.requireNonNull(ids, "ids is null");
 
-        return List.ofAll(ids)
+        return Iterator.ofAll(ids)
                 .map(this::delete)
                 .transform(Try::sequence)
                 .flatMap(ignored -> Try.<Void>success(null));
