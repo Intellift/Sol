@@ -1,9 +1,9 @@
 package org.intellift.sol.service;
 
 
-import javaslang.collection.Iterator;
-import javaslang.collection.Seq;
+import javaslang.collection.List;
 import javaslang.collection.Stream;
+import javaslang.collection.Traversable;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
@@ -38,12 +38,10 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return Try.of(() -> getRepository().save(entity));
     }
 
-    default Try<Seq<E>> save(final Iterable<E> entities) {
+    default Try<List<E>> save(final Traversable<E> entities) {
         Objects.requireNonNull(entities, "entities is null");
 
-        return Iterator.ofAll(entities)
-                .map(this::save)
-                .transform(Try::sequence);
+        return Try.of(() -> List.ofAll(getRepository().save(entities.toJavaList())));
     }
 
     default Try<E> create(final E entity) {
@@ -52,7 +50,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return save(entity);
     }
 
-    default Try<Seq<E>> create(final Iterable<E> entities) {
+    default Try<List<E>> create(final Traversable<E> entities) {
         Objects.requireNonNull(entities, "entities is null");
 
         return save(entities);
@@ -64,7 +62,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return save(entity);
     }
 
-    default Try<Seq<E>> update(final Iterable<E> entities) {
+    default Try<List<E>> update(final Traversable<E> entities) {
         Objects.requireNonNull(entities, "entities is null");
 
         return save(entities);
@@ -86,15 +84,10 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return Try.of(() -> Stream.ofAll(getRepository().findAll()));
     }
 
-    default Try<Seq<E>> findAll(final Iterable<ID> ids) {
+    default Try<List<E>> findAll(final Traversable<ID> ids) {
         Objects.requireNonNull(ids, "ids is null");
 
-        return Iterator.ofAll(ids)
-                .map(this::findOne)
-                .transform(Try::sequence)
-                .map(sequence -> sequence
-                        .filter(Option::isDefined)
-                        .map(Option::get));
+        return Try.of(() -> List.ofAll(getRepository().findAll(ids.toJavaList())));
     }
 
     default Try<Option<E>> findOne(final ID id) {
@@ -121,12 +114,9 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return delete(entity.getId());
     }
 
-    default Try<Void> delete(final Iterable<ID> ids) {
-        Objects.requireNonNull(ids, "ids is null");
+    default Try<Void> delete(final Traversable<E> entities) {
+        Objects.requireNonNull(entities, "entities is null");
 
-        return Iterator.ofAll(ids)
-                .map(this::delete)
-                .transform(Try::sequence)
-                .flatMap(ignored -> Try.<Void>success(null));
+        return Try.run(() -> getRepository().delete(entities.toJavaList()));
     }
 }
