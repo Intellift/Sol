@@ -107,7 +107,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String urlQueryForFirstPage = buildUri(endpoint, parametersWithoutPageSize);
 
-        final ListenableFuture<ResponseEntity<Page<D>>> future1 = asyncRestOperations.exchange(
+        final ListenableFuture<ResponseEntity<Page<D>>> firstPageFuture = asyncRestOperations.exchange(
                 urlQueryForFirstPage,
                 HttpMethod.GET,
                 httpEntity,
@@ -115,7 +115,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 }
         );
 
-        return convert(future1)
+        return convert(firstPageFuture)
                 .flatMap(pageResponseEntity -> {
                     final Long totalElements = pageResponseEntity.getBody().getTotalElements();
                     final Integer pageSize = pageResponseEntity.getBody().getSize();
@@ -127,7 +127,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                                 .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                                 .transform(params -> buildUri(endpoint, params));
 
-                        final ListenableFuture<ResponseEntity<Page<D>>> future2 = asyncRestOperations.exchange(
+                        final ListenableFuture<ResponseEntity<Page<D>>> allElementsFuture = asyncRestOperations.exchange(
                                 urlQueryForAllElements,
                                 HttpMethod.GET,
                                 httpEntity,
@@ -135,7 +135,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                                 }
                         );
 
-                        return convert(future2);
+                        return convert(allElementsFuture);
                     }
                 });
     }
