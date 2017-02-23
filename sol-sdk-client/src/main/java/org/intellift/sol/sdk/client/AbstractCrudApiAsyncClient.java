@@ -2,8 +2,8 @@ package org.intellift.sol.sdk.client;
 
 import javaslang.Tuple;
 import javaslang.Tuple2;
+import javaslang.collection.Foldable;
 import javaslang.collection.List;
-import javaslang.collection.Seq;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
@@ -60,6 +60,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 .flatMap(parameterNameValues -> parameterNameValues._2.map(value -> Tuple.of(parameterNameValues._1, value)));
     }
 
+    protected String buildUri(final String endpoint, final Foldable<Tuple2<String, String>> params) {
+        return params
+                .foldLeft(
+                        UriComponentsBuilder.fromUriString(endpoint),
+                        (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
+                .toUriString();
+    }
+
     @Override
     public final Future<ResponseEntity<Page<D>>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
@@ -68,21 +76,17 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String endpoint = getEndpoint();
 
-        final String uri = flattenParameterValues(parameters)
-                .foldLeft(
-                        UriComponentsBuilder.fromUriString(endpoint),
-                        (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
-                .toUriString();
+        final String url = buildUri(endpoint, flattenParameterValues(parameters));
 
-        final ListenableFuture<ResponseEntity<Page<D>>> listenableFuture = asyncRestOperations.exchange(
-                uri,
+        final ListenableFuture<ResponseEntity<Page<D>>> future = asyncRestOperations.exchange(
+                url,
                 HttpMethod.GET,
                 httpEntity,
                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                 }
         );
 
-        return convert(listenableFuture);
+        return convert(future);
     }
 
     @Override
@@ -98,24 +102,20 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String endpoint = getEndpoint();
 
-        final Seq<Tuple2<String, String>> processedQuery = flattenParameterValues(parameters)
+        final List<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equalsIgnoreCase(getPageSizeParameterName()));
 
-        final String firstPageQueryUri = processedQuery
-                .foldLeft(
-                        UriComponentsBuilder.fromUriString(endpoint),
-                        (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
-                .toUriString();
+        final String urlQueryForFirstPage = buildUri(endpoint, parametersWithoutPageSize);
 
-        final ListenableFuture<ResponseEntity<Page<D>>> listenableFuture1 = asyncRestOperations.exchange(
-                firstPageQueryUri,
+        final ListenableFuture<ResponseEntity<Page<D>>> future1 = asyncRestOperations.exchange(
+                urlQueryForFirstPage,
                 HttpMethod.GET,
                 httpEntity,
                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                 }
         );
 
-        return convert(listenableFuture1)
+        return convert(future1)
                 .flatMap(pageResponseEntity -> {
                     final Long totalElements = pageResponseEntity.getBody().getTotalElements();
                     final Integer pageSize = pageResponseEntity.getBody().getSize();
@@ -123,22 +123,19 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                     if (totalElements <= pageSize) {
                         return Future.successful(pageResponseEntity);
                     } else {
-                        final String allElementsQueryUri = processedQuery
+                        final String urlQueryForAllElements = parametersWithoutPageSize
                                 .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
-                                .foldLeft(
-                                        UriComponentsBuilder.fromUriString(endpoint),
-                                        (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
-                                .toUriString();
+                                .transform(params -> buildUri(endpoint, params));
 
-                        final ListenableFuture<ResponseEntity<Page<D>>> listenableFuture2 = asyncRestOperations.exchange(
-                                allElementsQueryUri,
+                        final ListenableFuture<ResponseEntity<Page<D>>> future2 = asyncRestOperations.exchange(
+                                urlQueryForAllElements,
                                 HttpMethod.GET,
                                 httpEntity,
                                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                                 }
                         );
 
-                        return convert(listenableFuture2);
+                        return convert(future2);
                     }
                 });
     }
@@ -148,16 +145,16 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         Objects.requireNonNull(id, "id is null");
 
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
-        final String uri = String.join("/", getEndpoint(), String.valueOf(id));
+        final String url = String.join("/", getEndpoint(), String.valueOf(id));
 
-        final ListenableFuture<ResponseEntity<D>> listenableFuture = asyncRestOperations.exchange(
-                uri,
+        final ListenableFuture<ResponseEntity<D>> future = asyncRestOperations.exchange(
+                url,
                 HttpMethod.GET,
                 httpEntity,
                 getDtoClass()
         );
 
-        return convert(listenableFuture);
+        return convert(future);
     }
 
     @Override
@@ -166,16 +163,16 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
-        final String uri = getEndpoint();
+        final String url = getEndpoint();
 
-        final ListenableFuture<ResponseEntity<D>> listenableFuture = asyncRestOperations.exchange(
-                uri,
+        final ListenableFuture<ResponseEntity<D>> future = asyncRestOperations.exchange(
+                url,
                 HttpMethod.POST,
                 httpEntity,
                 getDtoClass()
         );
 
-        return convert(listenableFuture);
+        return convert(future);
     }
 
     @Override
@@ -184,16 +181,16 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final HttpEntity<D> httpEntity = new HttpEntity<>(dto, getHeaders());
 
-        final String uri = String.join("/", getEndpoint(), String.valueOf(dto.getId()));
+        final String url = String.join("/", getEndpoint(), String.valueOf(dto.getId()));
 
-        final ListenableFuture<ResponseEntity<D>> listenableFuture = asyncRestOperations.exchange(
-                uri,
+        final ListenableFuture<ResponseEntity<D>> future = asyncRestOperations.exchange(
+                url,
                 HttpMethod.PUT,
                 httpEntity,
                 getDtoClass()
         );
 
-        return convert(listenableFuture);
+        return convert(future);
     }
 
     @Override
@@ -202,15 +199,15 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final HttpEntity<Void> httpEntity = new HttpEntity<>(getHeaders());
 
-        final String uri = String.join("/", getEndpoint(), String.valueOf(id));
+        final String url = String.join("/", getEndpoint(), String.valueOf(id));
 
-        final ListenableFuture<ResponseEntity<Void>> listenableFuture = asyncRestOperations.exchange(
-                uri,
+        final ListenableFuture<ResponseEntity<Void>> future = asyncRestOperations.exchange(
+                url,
                 HttpMethod.DELETE,
                 httpEntity,
                 Void.class
         );
 
-        return convert(listenableFuture);
+        return convert(future);
     }
 }
