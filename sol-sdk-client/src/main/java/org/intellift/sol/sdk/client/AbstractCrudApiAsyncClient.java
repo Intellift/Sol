@@ -105,10 +105,10 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         final List<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equalsIgnoreCase(getPageSizeParameterName()));
 
-        final String urlQueryForFirstPage = buildUri(endpoint, parametersWithoutPageSize);
+        final String firstPageUrl = buildUri(endpoint, parametersWithoutPageSize);
 
         final ListenableFuture<ResponseEntity<Page<D>>> firstPageFuture = asyncRestOperations.exchange(
-                urlQueryForFirstPage,
+                firstPageUrl,
                 HttpMethod.GET,
                 httpEntity,
                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
@@ -123,12 +123,12 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                     if (totalElements <= pageSize) {
                         return Future.successful(pageResponseEntity);
                     } else {
-                        final String urlQueryForAllElements = parametersWithoutPageSize
+                        final String allElementsUrl = parametersWithoutPageSize
                                 .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                                 .transform(params -> buildUri(endpoint, params));
 
                         final ListenableFuture<ResponseEntity<Page<D>>> allElementsFuture = asyncRestOperations.exchange(
-                                urlQueryForAllElements,
+                                allElementsUrl,
                                 HttpMethod.GET,
                                 httpEntity,
                                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
