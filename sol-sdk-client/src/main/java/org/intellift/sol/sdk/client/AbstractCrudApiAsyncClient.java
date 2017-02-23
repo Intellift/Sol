@@ -4,6 +4,7 @@ import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.Foldable;
 import javaslang.collection.List;
+import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
@@ -49,11 +50,11 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         return Future.fromJavaFuture(listenableFuture);
     }
 
-    protected List<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+    protected Stream<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
-        return List.ofAll(parameters)
-                .map(parameterNameValues -> Tuple.of(parameterNameValues._1, List.ofAll(parameterNameValues._2)))
+        return Stream.ofAll(parameters)
+                .map(parameterNameValues -> Tuple.of(parameterNameValues._1, Stream.ofAll(parameterNameValues._2)))
                 .map(parameterNameValues -> parameterNameValues._2.size() > 1
                         ? Tuple.of(parameterNameValues._1 + "[]", parameterNameValues._2)
                         : parameterNameValues)
@@ -102,7 +103,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
         final String endpoint = getEndpoint();
 
-        final List<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
+        final Stream<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equalsIgnoreCase(getPageSizeParameterName()));
 
         final String firstPageUrl = buildUri(endpoint, parametersWithoutPageSize);
@@ -124,7 +125,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                         return Future.successful(pageResponseEntity);
                     } else {
                         final String allElementsUrl = parametersWithoutPageSize
-                                .prepend(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
+                                .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                                 .transform(params -> buildUri(endpoint, params));
 
                         final ListenableFuture<ResponseEntity<Page<D>>> allElementsFuture = asyncRestOperations.exchange(
