@@ -101,15 +101,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         final Seq<Tuple2<String, String>> processedQuery = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equalsIgnoreCase(getPageSizeParameterName()));
 
-        final String metadataQueryUri = processedQuery
-                .prepend(Tuple.of(getPageSizeParameterName(), "0"))
+        final String firstPageQueryUri = processedQuery
                 .foldLeft(
                         UriComponentsBuilder.fromUriString(endpoint),
                         (builder, parameterNameValue) -> builder.queryParam(parameterNameValue._1, parameterNameValue._2))
                 .toUriString();
 
         final ListenableFuture<ResponseEntity<Page<D>>> listenableFuture1 = asyncRestOperations.exchange(
-                metadataQueryUri,
+                firstPageQueryUri,
                 HttpMethod.GET,
                 httpEntity,
                 new PageResponseTypeReference<Page<D>>(getDtoClass()) {
