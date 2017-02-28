@@ -17,13 +17,15 @@ public interface CrudApiAsyncClient<D extends Identifiable<ID>, ID extends Seria
 
     Future<ResponseEntity<Page<D>>> getAll(Iterable<Tuple2<String, Iterable<String>>> parameters);
 
+    Future<ResponseEntity<Page<D>>> getPage();
+
     Future<ResponseEntity<Page<D>>> getPage(Iterable<Tuple2<String, Iterable<String>>> parameters);
 
     Future<ResponseEntity<D>> getOne(ID id);
 
     Future<ResponseEntity<D>> create(D dto);
 
-    Future<ResponseEntity<D>> update(D dto);
+    Future<ResponseEntity<D>> replace(D dto);
 
     Future<ResponseEntity<Void>> delete(ID id);
 }
