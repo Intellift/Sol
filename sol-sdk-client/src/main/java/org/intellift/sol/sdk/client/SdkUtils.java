@@ -17,11 +17,8 @@ public abstract class SdkUtils {
         Objects.requireNonNull(parameters, "parameters is null");
 
         return Stream.ofAll(parameters)
-                .map(parameterNameValues -> Tuple.of(parameterNameValues._1, Stream.ofAll(parameterNameValues._2)))
-                .map(parameterNameValues -> parameterNameValues._2.size() > 1
-                        ? Tuple.of(parameterNameValues._1 + "[]", parameterNameValues._2)
-                        : parameterNameValues)
-                .flatMap(parameterNameValues -> parameterNameValues._2.map(value -> Tuple.of(parameterNameValues._1, value)));
+                .flatMap(parameterNameValues -> Stream.ofAll(parameterNameValues._2)
+                        .map(value -> Tuple.of(parameterNameValues._1, value)));
     }
 
     public static String buildUri(final String endpoint, final Foldable<Tuple2<String, String>> parameters) {
