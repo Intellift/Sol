@@ -7,10 +7,7 @@ import javaslang.collection.Stream;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.client.RestOperations;
 
 import java.io.Serializable;
@@ -39,7 +36,11 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
     }
 
     protected HttpHeaders getDefaultHeaders() {
-        return new HttpHeaders();
+        final HttpHeaders httpHeaders = new HttpHeaders();
+
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+
+        return httpHeaders;
     }
 
     @Override
