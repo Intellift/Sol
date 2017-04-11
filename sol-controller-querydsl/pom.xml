@@ -9,24 +9,24 @@
     <parent>
         <groupId>org.intellift.sol</groupId>
         <artifactId>sol-parent</artifactId>
-        <version>0.4.0-SNAPSHOT</version>
+        <version>0.4.0</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-controller</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>0.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-service-querydsl</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>0.4.0</version>
         </dependency>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-mapper</artifactId>
-            <version>0.4.0-SNAPSHOT</version>
+            <version>0.4.0</version>
         </dependency>
     </dependencies>
 </project>
