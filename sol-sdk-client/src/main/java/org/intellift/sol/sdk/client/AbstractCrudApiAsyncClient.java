@@ -8,10 +8,7 @@ import javaslang.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestOperations;
 
@@ -42,16 +39,20 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     protected HttpHeaders getDefaultHeaders() {
-        return new HttpHeaders();
+        final HttpHeaders httpHeaders = new HttpHeaders();
+
+        httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
+
+        return httpHeaders;
     }
 
     @Override
-    public final Future<ResponseEntity<Page<D>>> getPage() {
+    public final Future<Page<D>> getPage() {
         return getPage(Stream.empty());
     }
 
     @Override
-    public Future<ResponseEntity<Page<D>>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+    public Future<Page<D>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
         final ListenableFuture<ResponseEntity<Page<D>>> future = asyncRestOperations.exchange(
@@ -62,16 +63,17 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 }
         );
 
-        return fromJavaFuture(future);
+        return fromJavaFuture(future)
+                .map(HttpEntity::getBody);
     }
 
     @Override
-    public final Future<ResponseEntity<Page<D>>> getAll() {
+    public final Future<Page<D>> getAll() {
         return getAll(Stream.empty());
     }
 
     @Override
-    public Future<ResponseEntity<Page<D>>> getAll(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+    public Future<Page<D>> getAll(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
         final String endpoint = getEndpoint();
@@ -90,12 +92,13 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         );
 
         return fromJavaFuture(firstPageFuture)
-                .flatMap(pageResponseEntity -> {
-                    final Long totalElements = pageResponseEntity.getBody().getTotalElements();
-                    final Integer pageSize = pageResponseEntity.getBody().getSize();
+                .map(HttpEntity::getBody)
+                .flatMap(page -> {
+                    final Long totalElements = page.getTotalElements();
+                    final Integer pageSize = page.getSize();
 
                     if (totalElements <= pageSize) {
-                        return Future.successful(pageResponseEntity);
+                        return Future.successful(page);
                     } else {
                         final String allElementsUrl = parametersWithoutPageSize
                                 .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
@@ -109,13 +112,14 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                                 }
                         );
 
-                        return fromJavaFuture(allElementsFuture);
+                        return fromJavaFuture(allElementsFuture)
+                                .map(HttpEntity::getBody);
                     }
                 });
     }
 
     @Override
-    public Future<ResponseEntity<D>> getOne(final ID id) {
+    public Future<D> getOne(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
         final ListenableFuture<ResponseEntity<D>> future = asyncRestOperations.exchange(
@@ -125,11 +129,12 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 getDtoClass()
         );
 
-        return fromJavaFuture(future);
+        return fromJavaFuture(future)
+                .map(HttpEntity::getBody);
     }
 
     @Override
-    public Future<ResponseEntity<D>> create(final D dto) {
+    public Future<D> create(final D dto) {
         Objects.requireNonNull(dto, "dto is null");
 
         final ListenableFuture<ResponseEntity<D>> future = asyncRestOperations.exchange(
@@ -139,11 +144,12 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 getDtoClass()
         );
 
-        return fromJavaFuture(future);
+        return fromJavaFuture(future)
+                .map(HttpEntity::getBody);
     }
 
     @Override
-    public Future<ResponseEntity<D>> replace(final D dto) {
+    public Future<D> replace(final D dto) {
         Objects.requireNonNull(dto, "dto is null");
 
         final ListenableFuture<ResponseEntity<D>> future = asyncRestOperations.exchange(
@@ -153,11 +159,12 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 getDtoClass()
         );
 
-        return fromJavaFuture(future);
+        return fromJavaFuture(future)
+                .map(HttpEntity::getBody);
     }
 
     @Override
-    public Future<ResponseEntity<Void>> delete(final ID id) {
+    public Future<Void> delete(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
         final ListenableFuture<ResponseEntity<Void>> future = asyncRestOperations.exchange(
@@ -167,6 +174,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 Void.class
         );
 
-        return fromJavaFuture(future);
+        return fromJavaFuture(future)
+                .map(HttpEntity::getBody);
     }
 }
