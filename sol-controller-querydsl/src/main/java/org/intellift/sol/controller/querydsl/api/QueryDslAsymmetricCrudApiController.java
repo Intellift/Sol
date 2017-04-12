@@ -37,6 +37,6 @@ public interface QueryDslAsymmetricCrudApiController<E extends Identifiable<ID>,
                 .onFailure(throwable -> getLogger().error("Error occurred while processing GET request", throwable))
                 .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(null));
+                        .build());
     }
 }

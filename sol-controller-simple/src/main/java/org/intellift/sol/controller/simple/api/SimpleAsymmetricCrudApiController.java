@@ -30,6 +30,6 @@ public interface SimpleAsymmetricCrudApiController<E extends Identifiable<ID>, D
                 .onFailure(throwable -> getLogger().error("Error occurred while processing GET request", throwable))
                 .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(null));
+                        .build());
     }
 }

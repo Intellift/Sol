@@ -7,6 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
@@ -16,7 +17,9 @@ public interface PageMapper<E, D> extends Mapper<E, D> {
     default Page<D> mapTo(final Page<E> page) {
         Objects.requireNonNull(page, "page is null");
 
-        final List<D> objects = mapTo(page.getContent());
+        final List<D> objects = page.getContent().stream()
+                .map(this::mapTo)
+                .collect(Collectors.toList());
 
         return new PageImpl<>(
                 new ArrayList<>(objects),
@@ -28,7 +31,9 @@ public interface PageMapper<E, D> extends Mapper<E, D> {
     default Page<E> mapFrom(final Page<D> page) {
         Objects.requireNonNull(page, "page is null");
 
-        final List<E> objects = mapFrom(page.getContent());
+        final List<E> objects = page.getContent().stream()
+                .map(this::mapFrom)
+                .collect(Collectors.toList());
 
         return new PageImpl<>(
                 new ArrayList<>(objects),

@@ -44,11 +44,11 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
                                 .body(getMapper().mapTo(entity))),
                         Case(None(), ResponseEntity
                                 .status(HttpStatus.NOT_FOUND)
-                                .body(null))))
+                                .build())))
                 .onFailure(throwable -> getLogger().error("Error occurred while processing GET/{id} request", throwable))
                 .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(null));
+                        .build());
     }
 
     @PostMapping
@@ -67,7 +67,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
                 .onFailure(throwable -> getLogger().error("Error occurred while processing POST request", throwable))
                 .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(null));
+                        .build());
     }
 
     @PutMapping("/{id}")
@@ -93,7 +93,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
                 .onFailure(throwable -> getLogger().error("Error occurred while processing PUT request", throwable))
                 .getOrElse(() -> ResponseEntity
                         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body(null));
+                        .build());
     }
 
     @DeleteMapping("/{id}")
