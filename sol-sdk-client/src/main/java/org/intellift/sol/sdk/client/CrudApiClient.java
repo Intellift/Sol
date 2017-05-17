@@ -1,6 +1,6 @@
 package org.intellift.sol.sdk.client;
 
-import javaslang.Tuple2;
+import io.vavr.Tuple2;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;
 

@@ -1,10 +1,10 @@
 package org.intellift.sol.sdk.client;
 
-import javaslang.Function2;
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.Stream;
-import javaslang.concurrent.Future;
+import io.vavr.Function2;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.Stream;
+import io.vavr.concurrent.Future;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
@@ -15,7 +15,8 @@ import org.springframework.web.client.AsyncRestOperations;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static javaslang.concurrent.Future.fromJavaFuture;
+import static io.vavr.API.Stream;
+import static io.vavr.concurrent.Future.fromJavaFuture;
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
 
@@ -48,7 +49,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public final Future<Page<D>> getPage() {
-        return getPage(Stream.empty());
+        return getPage(Stream());
     }
 
     @Override
@@ -69,7 +70,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public final Future<Page<D>> getAll() {
-        return getAll(Stream.empty());
+        return getAll(Stream());
     }
 
     @Override

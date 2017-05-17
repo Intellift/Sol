@@ -1,9 +1,9 @@
 package org.intellift.sol.sdk.client;
 
-import javaslang.Function2;
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.Stream;
+import io.vavr.Function2;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.Stream;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
@@ -16,6 +16,7 @@ import org.springframework.web.client.RestOperations;
 import java.io.Serializable;
 import java.util.Objects;
 
+import static io.vavr.API.Stream;
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
 
@@ -48,7 +49,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
 
     @Override
     public final Page<D> getPage() {
-        return getPage(Stream.empty());
+        return getPage(Stream());
     }
 
     @Override
@@ -68,7 +69,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
 
     @Override
     public final Page<D> getAll() {
-        return getAll(Stream.empty());
+        return getAll(Stream());
     }
 
     @Override

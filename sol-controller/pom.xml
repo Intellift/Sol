@@ -9,24 +9,24 @@
     <parent>
         <groupId>org.intellift.sol</groupId>
         <artifactId>sol-parent</artifactId>
-        <version>0.4.0</version>
+        <version>0.5.0</version>
     </parent>
 
     <dependencies>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-service</artifactId>
-            <version>0.4.0</version>
+            <version>0.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-mapper</artifactId>
-            <version>0.4.0</version>
+            <version>0.5.0</version>
         </dependency>
 
         <dependency>
-            <groupId>io.javaslang</groupId>
-            <artifactId>javaslang-jackson</artifactId>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr-jackson</artifactId>
         </dependency>
 
         <dependency>
