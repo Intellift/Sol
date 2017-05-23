@@ -2,6 +2,7 @@ package org.intellift.sol.service.querydsl;
 
 
 import com.querydsl.core.types.Predicate;
+import io.vavr.collection.Stream;
 import io.vavr.control.Option;
 import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
@@ -25,6 +26,10 @@ public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Seri
 
     default Try<Page<E>> findAll(final Predicate predicate, final Pageable pageable) {
         return Try(() -> getRepository().findAll(predicate, pageable));
+    }
+
+    default Try<Stream<E>> findAll(final Predicate predicate) {
+        return Try(() -> Stream.ofAll(getRepository().findAll(predicate)));
     }
 
     default Try<Option<E>> findOne(final Predicate predicate) {
