@@ -14,7 +14,7 @@ import static io.vavr.API.Tuple;
  */
 public abstract class SdkUtils {
 
-    public static Stream<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+    public static Stream<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, ? extends Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
         return Stream.ofAll(parameters)

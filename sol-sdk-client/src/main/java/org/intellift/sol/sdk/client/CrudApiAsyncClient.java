@@ -2,6 +2,7 @@ package org.intellift.sol.sdk.client;
 
 import io.vavr.Tuple2;
 import io.vavr.concurrent.Future;
+import io.vavr.control.Option;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;
 
@@ -14,13 +15,13 @@ public interface CrudApiAsyncClient<D extends Identifiable<ID>, ID extends Seria
 
     Future<Page<D>> getAll();
 
-    Future<Page<D>> getAll(Iterable<Tuple2<String, Iterable<String>>> parameters);
+    Future<Page<D>> getAll(Iterable<Tuple2<String, ? extends Iterable<String>>> parameters);
 
     Future<Page<D>> getPage();
 
-    Future<Page<D>> getPage(Iterable<Tuple2<String, Iterable<String>>> parameters);
+    Future<Page<D>> getPage(Iterable<Tuple2<String, ? extends Iterable<String>>> parameters);
 
-    Future<D> getOne(ID id);
+    Future<Option<D>> getOne(ID id);
 
     Future<D> create(D dto);
 

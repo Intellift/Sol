@@ -1,6 +1,8 @@
 package org.intellift.sol.sdk.client;
 
 import io.vavr.Tuple2;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;
 
@@ -11,19 +13,19 @@ import java.io.Serializable;
  */
 public interface CrudApiClient<D extends Identifiable<ID>, ID extends Serializable> {
 
-    Page<D> getAll();
+    Try<Page<D>> getAll();
 
-    Page<D> getAll(Iterable<Tuple2<String, Iterable<String>>> parameters);
+    Try<Page<D>> getAll(Iterable<Tuple2<String, ? extends Iterable<String>>> parameters);
 
-    Page<D> getPage();
+    Try<Page<D>> getPage();
 
-    Page<D> getPage(Iterable<Tuple2<String, Iterable<String>>> parameters);
+    Try<Page<D>> getPage(Iterable<Tuple2<String, ? extends Iterable<String>>> parameters);
 
-    D getOne(ID id);
+    Try<Option<D>> getOne(ID id);
 
-    D create(D dto);
+    Try<D> create(D dto);
 
-    D replace(D dto);
+    Try<D> replace(D dto);
 
-    void delete(ID id);
+    Try<Void> delete(ID id);
 }
