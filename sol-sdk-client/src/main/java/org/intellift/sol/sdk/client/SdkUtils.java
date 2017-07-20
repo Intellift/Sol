@@ -1,13 +1,12 @@
 package org.intellift.sol.sdk.client;
 
-import io.vavr.Tuple2;
-import io.vavr.collection.Foldable;
-import io.vavr.collection.Stream;
+import javaslang.Tuple;
+import javaslang.Tuple2;
+import javaslang.collection.Foldable;
+import javaslang.collection.Stream;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Objects;
-
-import static io.vavr.API.Tuple;
 
 /**
  * @author Achilleas Naoumidis
@@ -19,7 +18,7 @@ public abstract class SdkUtils {
 
         return Stream.ofAll(parameters)
                 .flatMap(parameterNameValues -> Stream.ofAll(parameterNameValues._2)
-                        .map(value -> Tuple(parameterNameValues._1, value)));
+                        .map(value -> Tuple.of(parameterNameValues._1, value)));
     }
 
     public static String buildUri(final String endpoint, final Foldable<Tuple2<String, String>> parameters) {
@@ -29,7 +28,7 @@ public abstract class SdkUtils {
         return parameters
                 .foldLeft(
                         UriComponentsBuilder.fromUriString(endpoint),
-                        (builder, parameterNameValue) -> parameterNameValue.apply(builder::queryParam))
+                        (builder, parameterNameValue) -> parameterNameValue.transform(builder::queryParam))
                 .toUriString();
     }
 }

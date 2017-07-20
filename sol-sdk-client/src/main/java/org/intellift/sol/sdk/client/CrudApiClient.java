@@ -1,8 +1,8 @@
 package org.intellift.sol.sdk.client;
 
-import io.vavr.Tuple2;
-import io.vavr.control.Option;
-import io.vavr.control.Try;
+import javaslang.Tuple2;
+import javaslang.control.Option;
+import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;
 

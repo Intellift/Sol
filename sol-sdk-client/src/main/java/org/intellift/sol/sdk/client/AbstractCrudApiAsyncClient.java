@@ -1,11 +1,11 @@
 package org.intellift.sol.sdk.client;
 
-import io.vavr.Function2;
-import io.vavr.Tuple;
-import io.vavr.Tuple2;
-import io.vavr.collection.Stream;
-import io.vavr.concurrent.Future;
-import io.vavr.control.Option;
+import javaslang.Function2;
+import javaslang.Tuple;
+import javaslang.Tuple2;
+import javaslang.collection.Stream;
+import javaslang.concurrent.Future;
+import javaslang.control.Option;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
@@ -17,9 +17,9 @@ import org.springframework.web.client.HttpClientErrorException;
 import java.io.Serializable;
 import java.util.Objects;
 
-import static io.vavr.API.*;
-import static io.vavr.Predicates.instanceOf;
-import static io.vavr.concurrent.Future.fromJavaFuture;
+import static javaslang.API.*;
+import static javaslang.Predicates.instanceOf;
+import static javaslang.concurrent.Future.fromJavaFuture;
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
 
@@ -52,7 +52,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public final Future<Page<D>> getPage() {
-        return getPage(Stream());
+        return getPage(Stream.empty());
     }
 
     @Override
@@ -73,7 +73,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
 
     @Override
     public final Future<Page<D>> getAll() {
-        return getAll(Stream());
+        return getAll(Stream.empty());
     }
 
     @Override
@@ -138,7 +138,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                 .map(Option::of)
                 .recoverWith(throwable -> Match(throwable).of(
 
-                        Case($(instanceOf(HttpClientErrorException.class)), e -> {
+                        Case(instanceOf(HttpClientErrorException.class), e -> {
                             if (e.getRawStatusCode() == HttpStatus.NOT_FOUND.value()) {
                                 return Future.successful(Option.<D>none());
                             } else {

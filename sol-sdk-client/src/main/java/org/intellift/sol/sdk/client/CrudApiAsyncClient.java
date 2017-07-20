@@ -1,8 +1,8 @@
 package org.intellift.sol.sdk.client;
 
-import io.vavr.Tuple2;
-import io.vavr.concurrent.Future;
-import io.vavr.control.Option;
+import javaslang.Tuple2;
+import javaslang.concurrent.Future;
+import javaslang.control.Option;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;
 
