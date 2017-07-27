@@ -2,7 +2,7 @@ package org.intellift.sol.controller.querydsl.api;
 
 import com.querydsl.core.types.Predicate;
 import javaslang.control.Try;
-import org.intellift.sol.controller.api.AsymmetricCrudApiController;
+import org.intellift.sol.controller.api.CrudApiController;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.mapper.PageMapper;
 import org.intellift.sol.service.querydsl.QueryDslCrudService;
@@ -18,13 +18,15 @@ import java.util.function.BiFunction;
 /**
  * @author Achilleas Naoumidis, Chrisostomos Bakouras
  */
-public interface QueryDslAsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, RD extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, RD, ID> {
+public interface QueryDslCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> extends CrudApiController<E, D, ID> {
 
     @Override
     PageMapper<E, D> getMapper();
 
     @Override
-    PageMapper<E, RD> getReferenceMapper();
+    default PageMapper<E, D> getReferenceMapper() {
+        return getMapper();
+    }
 
     @Override
     QueryDslCrudService<E, ID> getService();

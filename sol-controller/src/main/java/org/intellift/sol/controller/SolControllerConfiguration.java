@@ -12,7 +12,7 @@ import org.springframework.context.annotation.Configuration;
 public class SolControllerConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(JavaslangModule.class)
+    @ConditionalOnMissingBean
     public JavaslangModule javaslangModule() {
         return new JavaslangModule();
     }
