@@ -16,8 +16,8 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <javaslang.version>2.0.4</javaslang.version>
-        <javaslang-jackson.version>2.0.4</javaslang-jackson.version>
+        <javaslang.version>2.0.6</javaslang.version>
+        <javaslang-jackson.version>2.0.5</javaslang-jackson.version>
     </properties>
 
     <modules>
