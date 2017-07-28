@@ -15,9 +15,6 @@ import static javaslang.API.*;
 import static javaslang.Patterns.None;
 import static javaslang.Patterns.Some;
 
-/**
- * @author Achilleas Naoumidis
- */
 public abstract class CrudApiDefaultImpl {
 
     public static <E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable>

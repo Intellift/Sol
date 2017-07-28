@@ -7,9 +7,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import java.io.Serializable;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 @NoRepositoryBean
 public interface QueryDslMongoRepository<T extends Identifiable<ID>, ID extends Serializable> extends QueryDslRepository<T, ID>, MongoRepository<T, ID> {
 }

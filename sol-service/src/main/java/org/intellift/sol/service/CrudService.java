@@ -14,9 +14,6 @@ import org.springframework.data.domain.Sort;
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public interface CrudService<E extends Identifiable<ID>, ID extends Serializable> {
 
     Repository<E, ID> getRepository();

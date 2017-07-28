@@ -13,9 +13,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.io.Serializable;
 import java.util.function.Function;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public interface SimpleAsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, RD extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, RD, ID> {
 
     @Override

@@ -23,9 +23,6 @@ import static javaslang.concurrent.Future.fromJavaFuture;
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID extends Serializable> implements CrudApiAsyncClient<D, ID> {
 
     protected final AsyncRestOperations asyncRestOperations;

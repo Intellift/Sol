@@ -16,9 +16,6 @@ import java.net.URI;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, RD extends Identifiable<ID>, ID extends Serializable> {
 
     default Logger getLogger() {

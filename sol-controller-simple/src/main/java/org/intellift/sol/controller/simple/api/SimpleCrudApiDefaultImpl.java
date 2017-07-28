@@ -11,9 +11,6 @@ import org.springframework.http.ResponseEntity;
 import java.io.Serializable;
 import java.util.function.Function;
 
-/**
- * @author Achilleas Naoumidis
- */
 public abstract class SimpleCrudApiDefaultImpl extends CrudApiDefaultImpl {
 
     public static <E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable>

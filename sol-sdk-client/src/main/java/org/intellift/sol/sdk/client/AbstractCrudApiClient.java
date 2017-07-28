@@ -21,9 +21,6 @@ import static javaslang.Predicates.instanceOf;
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID extends Serializable> implements CrudApiClient<D, ID> {
 
     protected final RestOperations restOperations;

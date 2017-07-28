@@ -5,9 +5,6 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.client.RestTemplate;
 
-/**
- * @author Achilleas Naoumidis
- */
 public class RestTemplateConfiguration {
 
     public static void addJavaslangJacksonModule(final AsyncRestTemplate asyncRestTemplates) {

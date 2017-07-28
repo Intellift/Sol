@@ -8,9 +8,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.Objects;
 
-/**
- * @author Achilleas Naoumidis
- */
 public abstract class SdkUtils {
 
     public static Stream<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, ? extends Iterable<String>>> parameters) {

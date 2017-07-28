@@ -15,9 +15,6 @@ import org.springframework.data.domain.Sort;
 import java.io.Serializable;
 import java.util.Objects;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Serializable> extends CrudService<E, ID> {
 
     @Override

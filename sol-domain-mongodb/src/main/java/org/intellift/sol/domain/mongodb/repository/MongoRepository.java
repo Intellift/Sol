@@ -6,9 +6,6 @@ import org.springframework.data.repository.NoRepositoryBean;
 
 import java.io.Serializable;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 @NoRepositoryBean
 public interface MongoRepository<E extends Identifiable<ID>, ID extends Serializable> extends Repository<E, ID>, org.springframework.data.mongodb.repository.MongoRepository<E, ID> {
 }

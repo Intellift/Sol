@@ -16,9 +16,6 @@ import java.net.URI;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public interface CrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, D, ID> {
 
     @Override

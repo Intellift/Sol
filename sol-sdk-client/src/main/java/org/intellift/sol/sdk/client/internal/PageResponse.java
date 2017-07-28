@@ -8,9 +8,6 @@ import org.springframework.data.domain.Sort;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public class PageResponse<D> extends PageImpl<D> {
 
     private int number;

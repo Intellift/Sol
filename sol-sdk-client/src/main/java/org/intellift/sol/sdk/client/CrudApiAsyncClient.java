@@ -8,9 +8,6 @@ import org.springframework.data.domain.Page;
 
 import java.io.Serializable;
 
-/**
- * @author Chrisostomos Bakouras.
- */
 public interface CrudApiAsyncClient<D extends Identifiable<ID>, ID extends Serializable> {
 
     Future<Page<D>> getAll();

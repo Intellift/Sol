@@ -13,9 +13,6 @@ import java.io.Serializable;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-/**
- * @author Achilleas Naoumidis
- */
 public abstract class QueryDslCrudApiDefaultImpl extends CrudApiDefaultImpl {
 
     public static <E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable>
