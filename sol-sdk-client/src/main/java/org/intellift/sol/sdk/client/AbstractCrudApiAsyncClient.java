@@ -13,6 +13,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestOperations;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Objects;
 
 import static javaslang.concurrent.Future.fromJavaFuture;
@@ -100,7 +101,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                     if (totalElements <= pageSize) {
                         return Future.successful(page);
                     } else {
-                        final String allElementsUrl = parametersWithoutPageSize
+                        final URI allElementsUrl = parametersWithoutPageSize
                                 .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                                 .transform(Function2.of(SdkUtils::buildUri).apply(endpoint));
 

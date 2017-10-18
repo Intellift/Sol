@@ -6,6 +6,7 @@ import javaslang.collection.Foldable;
 import javaslang.collection.Stream;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
 import java.util.Objects;
 
 /**
@@ -21,7 +22,7 @@ public abstract class SdkUtils {
                         .map(value -> Tuple.of(parameterNameValues._1, value)));
     }
 
-    public static String buildUri(final String endpoint, final Foldable<Tuple2<String, String>> parameters) {
+    public static URI buildUri(final String endpoint, final Foldable<Tuple2<String, String>> parameters) {
         Objects.requireNonNull(endpoint, "endpoint is null");
         Objects.requireNonNull(parameters, "parameters is null");
 
@@ -29,6 +30,7 @@ public abstract class SdkUtils {
                 .foldLeft(
                         UriComponentsBuilder.fromUriString(endpoint),
                         (builder, parameterNameValue) -> parameterNameValue.transform(builder::queryParam))
-                .toUriString();
+                .build()
+                .toUri();
     }
 }

@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestOperations;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Objects;
 
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
@@ -98,7 +99,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
         if (totalElements <= pageSize) {
             return firstPage;
         } else {
-            final String allElementsUrl = parametersWithoutPageSize
+            final URI allElementsUrl = parametersWithoutPageSize
                     .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                     .transform(Function2.of(SdkUtils::buildUri).apply(endpoint));
 
