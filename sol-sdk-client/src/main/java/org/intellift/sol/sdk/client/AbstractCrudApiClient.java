@@ -14,6 +14,7 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestOperations;
 
 import java.io.Serializable;
+import java.net.URI;
 import java.util.Objects;
 
 import static javaslang.API.*;
@@ -95,7 +96,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                     if (totalElements <= pageSize) {
                         return Try.success(page);
                     } else {
-                        final String allElementsUrl = parametersWithoutPageSize
+                        final URI allElementsUrl = parametersWithoutPageSize
                                 .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                                 .transform(Function2.of(SdkUtils::buildUri).apply(endpoint));
 
