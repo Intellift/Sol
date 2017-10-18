@@ -44,7 +44,7 @@ public abstract class SdkUtils {
 
         return parameters
                 .foldLeft(UriComponentsBuilder.fromUriString(endpoint), reducer)
-                .build()
+                .build(true)
                 .toUri();
     }
 
