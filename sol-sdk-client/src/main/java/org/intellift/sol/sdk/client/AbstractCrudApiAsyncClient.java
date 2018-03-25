@@ -55,7 +55,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     public Future<Page<D>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
-        return Future.fromTry(buildUri(getEndpoint(), flattenParameterValues(parameters)))
+        return buildUri(getEndpoint(), flattenParameterValues(parameters))
                 .map(uri -> asyncRestOperations.exchange(
                         uri,
                         HttpMethod.GET,
@@ -63,8 +63,9 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                         }
                 ))
+                .transform(Future::fromTry)
                 .flatMap(Future::fromJavaFuture)
-                .map(HttpEntity::getBody);
+                .map(ResponseEntity::getBody);
     }
 
     @Override
@@ -83,7 +84,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         final Stream<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equalsIgnoreCase(getPageSizeParameterName()));
 
-        final Future<Page<D>> firstPageFuture = Future.fromTry(buildUri(endpoint, parametersWithoutPageSize))
+        final Future<Page<D>> firstPageFuture = buildUri(endpoint, parametersWithoutPageSize)
                 .map(uri -> asyncRestOperations.exchange(
                         uri,
                         HttpMethod.GET,
@@ -91,8 +92,9 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                         }
                 ))
+                .transform(Future::fromTry)
                 .flatMap(Future::fromJavaFuture)
-                .map(HttpEntity::getBody);
+                .map(ResponseEntity::getBody);
 
         return firstPageFuture
                 .flatMap(page -> {
@@ -104,7 +106,6 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                             : parametersWithoutPageSize
                             .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
                             .transform(Function2.of(SdkUtils::buildUri).apply(endpoint))
-                            .transform(Future::fromTry)
                             .map(allElementsUri -> asyncRestOperations.exchange(
                                     allElementsUri,
                                     HttpMethod.GET,
@@ -112,8 +113,9 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
                                     new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                                     }
                             ))
+                            .transform(Future::fromTry)
                             .flatMap(Future::fromJavaFuture)
-                            .map(HttpEntity::getBody);
+                            .map(ResponseEntity::getBody);
                 });
     }
 
@@ -129,7 +131,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         );
 
         return fromJavaFuture(future)
-                .map(HttpEntity::getBody);
+                .map(ResponseEntity::getBody);
     }
 
     @Override
@@ -144,7 +146,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         );
 
         return fromJavaFuture(future)
-                .map(HttpEntity::getBody);
+                .map(ResponseEntity::getBody);
     }
 
     @Override
@@ -159,7 +161,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         );
 
         return fromJavaFuture(future)
-                .map(HttpEntity::getBody);
+                .map(ResponseEntity::getBody);
     }
 
     @Override
@@ -174,6 +176,6 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         );
 
         return fromJavaFuture(future)
-                .map(HttpEntity::getBody);
+                .map(ResponseEntity::getBody);
     }
 }

@@ -8,10 +8,7 @@ import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
+import org.springframework.http.*;
 import org.springframework.web.client.RestOperations;
 
 import java.io.Serializable;
@@ -65,7 +62,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                         }
                 )))
-                .map(HttpEntity::getBody)
+                .map(ResponseEntity::getBody)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
@@ -93,7 +90,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                         }
                 )))
-                .map(HttpEntity::getBody);
+                .map(ResponseEntity::getBody);
 
         return firstPageTry
                 .flatMap(firstPage -> {
@@ -112,7 +109,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                                     new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                                     }
                             )))
-                            .map(HttpEntity::getBody);
+                            .map(ResponseEntity::getBody);
                 })
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
@@ -128,7 +125,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                         new HttpEntity<>(getDefaultHeaders()),
                         getDtoClass()
                 ))
-                .map(HttpEntity::getBody)
+                .map(ResponseEntity::getBody)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
@@ -143,7 +140,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                         new HttpEntity<>(dto, getDefaultHeaders()),
                         getDtoClass()
                 ))
-                .map(HttpEntity::getBody)
+                .map(ResponseEntity::getBody)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
@@ -158,7 +155,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                         new HttpEntity<>(dto, getDefaultHeaders()),
                         getDtoClass()
                 ))
-                .map(HttpEntity::getBody)
+                .map(ResponseEntity::getBody)
                 .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
