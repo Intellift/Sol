@@ -5,10 +5,10 @@ import javaslang.Tuple2;
 import javaslang.collection.Foldable;
 import javaslang.collection.Seq;
 import javaslang.collection.Stream;
+import javaslang.control.Try;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.util.Objects;
 import java.util.function.BiFunction;
@@ -23,14 +23,15 @@ public abstract class SdkUtils {
                         .map(value -> Tuple.of(parameterNameValues._1, value)));
     }
 
-    public static URI buildUri(final String endpoint, final Seq<Tuple2<String, String>> parameters) {
+    public static Try<URI> buildUri(final String endpoint, final Seq<Tuple2<String, String>> parameters) {
         Objects.requireNonNull(endpoint, "endpoint is null");
         Objects.requireNonNull(parameters, "parameters is null");
 
-        final Seq<Tuple2<String, String>> encodedParameters = parameters
-                .map(parameter -> parameter.map2(SdkUtils::encode));
-
-        return foldEndpointWithParameters(endpoint, encodedParameters);
+        return parameters.toList()
+                .map(parameter -> encode(parameter._2)
+                        .map(encodedParameterValue -> Tuple.of(parameter._1, encodedParameterValue)))
+                .transform(Try::sequence)
+                .map(encodedParameters -> foldEndpointWithParameters(endpoint, encodedParameters));
     }
 
     private static URI foldEndpointWithParameters(final String endpoint, final Foldable<Tuple2<String, String>> parameters) {
@@ -45,11 +46,7 @@ public abstract class SdkUtils {
                 .toUri();
     }
 
-    private static String encode(final String value) {
-        try {
-            return UriUtils.encode(value, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
+    private static Try<String> encode(final String value) {
+        return Try.of(() -> UriUtils.encode(value, "UTF-8"));
     }
 }
