@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Serializable> extends CrudService<E, ID> {
 
@@ -24,25 +25,32 @@ public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Seri
         return Try.of(() -> Stream.ofAll(getRepository().findAll(predicate)));
     }
 
-    default Try<Stream<E>> findAll(final OrderSpecifier<?>... orders) {
-        return Try.of(() -> Stream.ofAll(getRepository().findAll(orders)));
-    }
-
     default Try<Stream<E>> findAll(final Predicate predicate, final Sort sort) {
         Objects.requireNonNull(sort, "sort is null");
 
         return Try.of(() -> Stream.ofAll(getRepository().findAll(predicate, sort)));
     }
 
-    default Try<Page<E>> findAll(final Predicate predicate, final Pageable pageable) {
-        return Try.of(() -> getRepository().findAll(predicate, pageable));
-    }
-
     default Try<Stream<E>> findAll(final Predicate predicate, final OrderSpecifier<?>... orders) {
         return Try.of(() -> Stream.ofAll(getRepository().findAll(predicate, orders)));
     }
 
+    default Try<Stream<E>> findAll(final OrderSpecifier<?>... orders) {
+        return Try.of(() -> Stream.ofAll(getRepository().findAll(orders)));
+    }
+
+    default Try<Page<E>> findAll(final Predicate predicate, final Pageable pageable) {
+        return Try.of(() -> getRepository().findAll(predicate, pageable));
+    }
+
     default Try<Option<E>> findOne(final Predicate predicate) {
         return Try.of(() -> Option.of(getRepository().findOne(predicate)));
+    }
+
+    default Try<E> findOne(final Predicate predicate, final Supplier<? extends Exception> ifNotFound) {
+        Objects.requireNonNull(ifNotFound, "ifNotFound is null");
+
+        return Try.of(() -> Option.of(getRepository().findOne(predicate)))
+                .flatMap(entityOption -> entityOption.toTry(ifNotFound));
     }
 }

@@ -16,7 +16,6 @@
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
 
-        <javaslang.version>2.0.6</javaslang.version>
         <javaslang-jackson.version>2.0.5</javaslang-jackson.version>
     </properties>
 
@@ -41,16 +40,11 @@
             <dependency>
                 <groupId>io.spring.platform</groupId>
                 <artifactId>platform-bom</artifactId>
-                <version>Brussels-SR1</version>
+                <version>Brussels-SR7</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
 
-            <dependency>
-                <groupId>io.javaslang</groupId>
-                <artifactId>javaslang</artifactId>
-                <version>${javaslang.version}</version>
-            </dependency>
             <dependency>
                 <groupId>io.javaslang</groupId>
                 <artifactId>javaslang-jackson</artifactId>

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.function.Supplier;
 
 public interface CrudService<E extends Identifiable<ID>, ID extends Serializable> {
 
@@ -98,6 +99,21 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         return findOne(entity.getId());
     }
 
+    default Try<E> findOne(final ID id, final Supplier<? extends Exception> ifNotFound) {
+        Objects.requireNonNull(id, "id is null");
+        Objects.requireNonNull(ifNotFound, "ifNotFound is null");
+
+        return Try.of(() -> Option.of(getRepository().findOne(id)))
+                .flatMap(entityOption -> entityOption.toTry(ifNotFound));
+    }
+
+    default Try<E> findOne(final E entity, final Supplier<? extends Exception> ifNotFound) {
+        Objects.requireNonNull(entity, "entity is null");
+        Objects.requireNonNull(ifNotFound, "ifNotFound is null");
+
+        return findOne(entity.getId(), ifNotFound);
+    }
+
     default Try<Void> delete(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
@@ -107,7 +123,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Void> delete(final E entity) {
         Objects.requireNonNull(entity, "entity is null");
 
-        return delete(entity.getId());
+        return Try.run(() -> getRepository().delete(entity));
     }
 
     default Try<Void> delete(final Seq<E> entities) {
