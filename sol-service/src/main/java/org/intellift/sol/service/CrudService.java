@@ -3,6 +3,7 @@ package org.intellift.sol.service;
 import javaslang.collection.List;
 import javaslang.collection.Seq;
 import javaslang.collection.Stream;
+import javaslang.control.Either;
 import javaslang.control.Option;
 import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
@@ -13,6 +14,7 @@ import org.springframework.data.domain.Sort;
 
 import java.io.Serializable;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface CrudService<E extends Identifiable<ID>, ID extends Serializable> {
@@ -85,6 +87,17 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         Objects.requireNonNull(ids, "ids is null");
 
         return Try.of(() -> List.ofAll(getRepository().findAll(ids.toJavaList())));
+    }
+
+    default Either<List<Throwable>, List<E>> findEvery(final Seq<ID> ids, final Function<ID, ? extends Exception> ifNotFound) {
+        Objects.requireNonNull(ids, "ids is null");
+        Objects.requireNonNull(ifNotFound, "ifNotFound is null");
+
+        return ids.toList()
+                .map(id -> findOne(id, () -> ifNotFound.apply(id)))
+                .transform(entityTries -> entityTries.find(Try::isFailure).isDefined()
+                        ? Either.left(entityTries.filter(Try::isFailure).map(Try::getCause))
+                        : Either.right(entityTries.map(Try::get)));
     }
 
     default Try<Option<E>> findOne(final ID id) {
