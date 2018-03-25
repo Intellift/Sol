@@ -4,6 +4,7 @@ import javaslang.Function2;
 import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.Stream;
+import javaslang.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
@@ -14,8 +15,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestOperations;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Objects;
+import java.util.function.Function;
 
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
@@ -56,15 +57,16 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
     public Page<D> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
-        return restOperations
-                .exchange(
-                        buildUri(getEndpoint(), flattenParameterValues(parameters)),
+        return buildUri(getEndpoint(), flattenParameterValues(parameters))
+                .flatMap(uri -> Try.of(() -> restOperations.exchange(
+                        uri,
                         HttpMethod.GET,
                         new HttpEntity<>(getDefaultHeaders()),
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                         }
-                )
-                .getBody();
+                )))
+                .map(HttpEntity::getBody)
+                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
     @Override
@@ -83,91 +85,94 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
         final Stream<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equals(getPageSizeParameterName()));
 
-        final Page<D> firstPage = restOperations
-                .exchange(
-                        buildUri(endpoint, parametersWithoutPageSize),
+        final Try<Page<D>> firstPageTry = buildUri(endpoint, parametersWithoutPageSize)
+                .flatMap(uri -> Try.of(() -> restOperations.exchange(
+                        uri,
                         HttpMethod.GET,
                         httpEntity,
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
                         }
-                )
-                .getBody();
+                )))
+                .map(HttpEntity::getBody);
 
-        final Long totalElements = firstPage.getTotalElements();
-        final Integer pageSize = firstPage.getSize();
+        return firstPageTry
+                .flatMap(firstPage -> {
+                    final Long totalElements = firstPage.getTotalElements();
+                    final Integer pageSize = firstPage.getSize();
 
-        if (totalElements <= pageSize) {
-            return firstPage;
-        } else {
-            final URI allElementsUrl = parametersWithoutPageSize
-                    .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
-                    .transform(Function2.of(SdkUtils::buildUri).apply(endpoint));
-
-            return restOperations
-                    .exchange(
-                            allElementsUrl,
-                            HttpMethod.GET,
-                            httpEntity,
-                            new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                            }
-                    )
-                    .getBody();
-        }
+                    return totalElements <= pageSize
+                            ? Try.success(firstPage)
+                            : parametersWithoutPageSize
+                            .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
+                            .transform(Function2.of(SdkUtils::buildUri).apply(endpoint))
+                            .flatMap(allElementsUri -> Try.of(() -> restOperations.exchange(
+                                    allElementsUri,
+                                    HttpMethod.GET,
+                                    httpEntity,
+                                    new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                                    }
+                            )))
+                            .map(HttpEntity::getBody);
+                })
+                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
     @Override
     public D getOne(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        return restOperations
-                .exchange(
+        return Try
+                .of(() -> restOperations.exchange(
                         String.join("/", getEndpoint(), String.valueOf(id)),
                         HttpMethod.GET,
                         new HttpEntity<>(getDefaultHeaders()),
                         getDtoClass()
-                )
-                .getBody();
+                ))
+                .map(HttpEntity::getBody)
+                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
     @Override
     public D create(final D dto) {
         Objects.requireNonNull(dto, "dto is null");
 
-        return restOperations
-                .exchange(
+        return Try
+                .of(() -> restOperations.exchange(
                         getEndpoint(),
                         HttpMethod.POST,
                         new HttpEntity<>(dto, getDefaultHeaders()),
                         getDtoClass()
-                )
-                .getBody();
+                ))
+                .map(HttpEntity::getBody)
+                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
     @Override
     public D replace(final D dto) {
         Objects.requireNonNull(dto, "dto is null");
 
-        return restOperations
-                .exchange(
+        return Try
+                .of(() -> restOperations.exchange(
                         String.join("/", getEndpoint(), String.valueOf(dto.getId())),
                         HttpMethod.PUT,
                         new HttpEntity<>(dto, getDefaultHeaders()),
                         getDtoClass()
-                )
-                .getBody();
+                ))
+                .map(HttpEntity::getBody)
+                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 
     @Override
     public void delete(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        restOperations
-                .exchange(
+        Try
+                .of(() -> restOperations.exchange(
                         String.join("/", getEndpoint(), String.valueOf(id)),
                         HttpMethod.DELETE,
                         new HttpEntity<>(getDefaultHeaders()),
                         Void.class
-                )
-                .getBody();
+                ))
+                .getOrElseThrow((Function<Throwable, RuntimeException>) RuntimeException::new);
     }
 }
