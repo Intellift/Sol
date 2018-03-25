@@ -15,7 +15,6 @@ import org.springframework.web.client.AsyncRestOperations;
 import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Objects;
 
 import static javaslang.API.*;
@@ -57,15 +56,16 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     public Future<Page<D>> getPage(final Iterable<Tuple2<String, ? extends Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
-        final ListenableFuture<ResponseEntity<Page<D>>> future = asyncRestOperations.exchange(
-                buildUri(getEndpoint(), flattenParameterValues(parameters)),
-                HttpMethod.GET,
-                new HttpEntity<>(getDefaultHeaders()),
-                new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                }
-        );
-
-        return fromJavaFuture(future)
+        return buildUri(getEndpoint(), flattenParameterValues(parameters))
+                .map(uri -> asyncRestOperations.exchange(
+                        uri,
+                        HttpMethod.GET,
+                        new HttpEntity<>(getDefaultHeaders()),
+                        new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                        }
+                ))
+                .transform(Future::fromTry)
+                .flatMap(Future::fromJavaFuture)
                 .map(ResponseEntity::getBody);
     }
 
@@ -85,38 +85,38 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         final Stream<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equalsIgnoreCase(getPageSizeParameterName()));
 
-        final ListenableFuture<ResponseEntity<Page<D>>> firstPageFuture = asyncRestOperations.exchange(
-                buildUri(endpoint, parametersWithoutPageSize),
-                HttpMethod.GET,
-                httpEntity,
-                new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                }
-        );
+        final Future<Page<D>> firstPageFuture = buildUri(endpoint, parametersWithoutPageSize)
+                .map(uri -> asyncRestOperations.exchange(
+                        uri,
+                        HttpMethod.GET,
+                        httpEntity,
+                        new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                        }
+                ))
+                .transform(Future::fromTry)
+                .flatMap(Future::fromJavaFuture)
+                .map(ResponseEntity::getBody);
 
-        return fromJavaFuture(firstPageFuture)
-                .map(ResponseEntity::getBody)
+        return firstPageFuture
                 .flatMap(page -> {
                     final Long totalElements = page.getTotalElements();
                     final Integer pageSize = page.getSize();
 
-                    if (totalElements <= pageSize) {
-                        return Future.successful(page);
-                    } else {
-                        final URI allElementsUrl = parametersWithoutPageSize
-                                .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
-                                .transform(Function2.of(SdkUtils::buildUri).apply(endpoint));
-
-                        final ListenableFuture<ResponseEntity<Page<D>>> allElementsFuture = asyncRestOperations.exchange(
-                                allElementsUrl,
-                                HttpMethod.GET,
-                                httpEntity,
-                                new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                                }
-                        );
-
-                        return fromJavaFuture(allElementsFuture)
-                                .map(ResponseEntity::getBody);
-                    }
+                    return totalElements <= pageSize
+                            ? Future.successful(page)
+                            : parametersWithoutPageSize
+                            .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
+                            .transform(Function2.of(SdkUtils::buildUri).apply(endpoint))
+                            .map(allElementsUri -> asyncRestOperations.exchange(
+                                    allElementsUri,
+                                    HttpMethod.GET,
+                                    httpEntity,
+                                    new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                                    }
+                            ))
+                            .transform(Future::fromTry)
+                            .flatMap(Future::fromJavaFuture)
+                            .map(ResponseEntity::getBody);
                 });
     }
 

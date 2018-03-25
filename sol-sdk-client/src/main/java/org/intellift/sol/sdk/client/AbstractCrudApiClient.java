@@ -14,7 +14,6 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestOperations;
 
 import java.io.Serializable;
-import java.net.URI;
 import java.util.Objects;
 
 import static javaslang.API.*;
@@ -55,13 +54,13 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
     public Try<Page<D>> getPage(final Iterable<Tuple2<String, ? extends Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
-        return Try
-                .of(() -> restOperations.exchange(
-                        buildUri(getEndpoint(), flattenParameterValues(parameters)),
+        return buildUri(getEndpoint(), flattenParameterValues(parameters))
+                .flatMap(uri -> Try.of(() -> restOperations.exchange(
+                        uri,
                         HttpMethod.GET,
                         new HttpEntity<>(getDefaultHeaders()),
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                        }))
+                        })))
                 .map(ResponseEntity::getBody);
     }
 
@@ -81,34 +80,30 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
         final Stream<Tuple2<String, String>> parametersWithoutPageSize = flattenParameterValues(parameters)
                 .filter(parameterNameValues -> !parameterNameValues._1.equals(getPageSizeParameterName()));
 
-        return Try
-                .of(() -> restOperations.exchange(
-                        buildUri(endpoint, parametersWithoutPageSize),
+        return buildUri(endpoint, parametersWithoutPageSize)
+                .flatMap(uri -> Try.of(() -> restOperations.exchange(
+                        uri,
                         HttpMethod.GET,
                         httpEntity,
                         new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                        }))
+                        })))
                 .map(ResponseEntity::getBody)
                 .flatMap(page -> {
                     final Long totalElements = page.getTotalElements();
                     final Integer pageSize = page.getSize();
 
-                    if (totalElements <= pageSize) {
-                        return Try.success(page);
-                    } else {
-                        final URI allElementsUrl = parametersWithoutPageSize
-                                .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
-                                .transform(Function2.of(SdkUtils::buildUri).apply(endpoint));
-
-                        return Try
-                                .of(() -> restOperations.exchange(
-                                        allElementsUrl,
-                                        HttpMethod.GET,
-                                        httpEntity,
-                                        new PageResponseTypeReference<Page<D>>(getDtoClass()) {
-                                        }))
-                                .map(ResponseEntity::getBody);
-                    }
+                    return totalElements <= pageSize
+                            ? Try.success(page)
+                            : parametersWithoutPageSize
+                            .append(Tuple.of(getPageSizeParameterName(), String.valueOf(totalElements)))
+                            .transform(Function2.of(SdkUtils::buildUri).apply(endpoint))
+                            .flatMap(allElementsUri -> Try.of(() -> restOperations.exchange(
+                                    allElementsUri,
+                                    HttpMethod.GET,
+                                    httpEntity,
+                                    new PageResponseTypeReference<Page<D>>(getDtoClass()) {
+                                    })))
+                            .map(ResponseEntity::getBody);
                 });
     }
 
