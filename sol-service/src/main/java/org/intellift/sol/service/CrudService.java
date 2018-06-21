@@ -28,7 +28,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Boolean> exists(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        return Try.of(() -> getRepository().exists(id));
+        return Try.of(() -> getRepository().existsById(id));
     }
 
     default Try<Long> count() {
@@ -44,7 +44,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<List<E>> save(final Traversable<E> entities) {
         Objects.requireNonNull(entities, "entities is null");
 
-        return Try.of(() -> List.ofAll(getRepository().save(entities.toJavaList())));
+        return Try.of(() -> List.ofAll(getRepository().saveAll(entities.toJavaList())));
     }
 
     default Try<E> create(final E entity) {
@@ -90,7 +90,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<List<E>> findAll(final Traversable<ID> ids) {
         Objects.requireNonNull(ids, "ids is null");
 
-        return Try.of(() -> List.ofAll(getRepository().findAll(ids.toJavaList())));
+        return Try.of(() -> List.ofAll(getRepository().findAllById(ids.toJavaList())));
     }
 
     default Either<List<Throwable>, List<E>> findEvery(final Traversable<ID> ids, final Function<ID, ? extends Exception> ifNotFound) {
@@ -107,7 +107,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Option<E>> findOne(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        return Try.of(() -> Option.of(getRepository().findOne(id)));
+        return Try.of(() -> Option.ofOptional(getRepository().findById(id)));
     }
 
     default Try<Option<E>> findOne(final E entity) {
@@ -120,7 +120,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
         Objects.requireNonNull(id, "id is null");
         Objects.requireNonNull(ifNotFound, "ifNotFound is null");
 
-        return Try.of(() -> Option.of(getRepository().findOne(id)))
+        return Try.of(() -> Option.ofOptional(getRepository().findById(id)))
                 .flatMap(entityOption -> entityOption.toTry(ifNotFound));
     }
 
@@ -134,7 +134,7 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Void> delete(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
-        return Try.run(() -> getRepository().delete(id));
+        return Try.run(() -> getRepository().deleteById(id));
     }
 
     default Try<Void> delete(final E entity) {
@@ -146,6 +146,6 @@ public interface CrudService<E extends Identifiable<ID>, ID extends Serializable
     default Try<Void> delete(final Traversable<E> entities) {
         Objects.requireNonNull(entities, "entities is null");
 
-        return Try.run(() -> getRepository().delete(entities.toJavaList()));
+        return Try.run(() -> getRepository().deleteAll(entities.toJavaList()));
     }
 }

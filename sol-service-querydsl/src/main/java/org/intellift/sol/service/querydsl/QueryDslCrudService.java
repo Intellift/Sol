@@ -48,13 +48,13 @@ public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Seri
     }
 
     default Try<Option<E>> findOne(final Predicate predicate) {
-        return Try.of(() -> Option.of(getRepository().findOne(predicate)));
+        return Try.of(() -> Option.ofOptional(getRepository().findOne(predicate)));
     }
 
     default Try<E> findOne(final Predicate predicate, final Supplier<? extends Exception> ifNotFound) {
         Objects.requireNonNull(ifNotFound, "ifNotFound is null");
 
-        return Try.of(() -> Option.of(getRepository().findOne(predicate)))
+        return Try.of(() -> Option.ofOptional(getRepository().findOne(predicate)))
                 .flatMap(entityOption -> entityOption.toTry(ifNotFound));
     }
 }
