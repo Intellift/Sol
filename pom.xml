@@ -50,6 +50,72 @@
                 <artifactId>javaslang-jackson</artifactId>
                 <version>${javaslang-jackson.version}</version>
             </dependency>
+
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-controller</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-controller-querydsl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-controller-simple</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-domain</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-domain-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-domain-mongodb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-domain-querydsl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-domain-querydsl-jpa</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-domain-querydsl-mongodb</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-mapper</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-sdk-client</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-service</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.intellift.sol</groupId>
+                <artifactId>sol-service-querydsl</artifactId>
+                <version>${project.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 </project>
