@@ -13,6 +13,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestOperations;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Objects;
 
 import static javaslang.concurrent.Future.fromJavaFuture;
@@ -41,6 +42,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     protected HttpHeaders getDefaultHeaders() {
         final HttpHeaders httpHeaders = new HttpHeaders();
 
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
         return httpHeaders;

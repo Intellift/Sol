@@ -14,6 +14,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.client.RestOperations;
 
 import java.io.Serializable;
+import java.util.Collections;
 import java.util.Objects;
 
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
@@ -41,6 +42,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
     protected HttpHeaders getDefaultHeaders() {
         final HttpHeaders httpHeaders = new HttpHeaders();
 
+        httpHeaders.setAccept(Collections.singletonList(MediaType.APPLICATION_JSON_UTF8));
         httpHeaders.setContentType(MediaType.APPLICATION_JSON_UTF8);
 
         return httpHeaders;
