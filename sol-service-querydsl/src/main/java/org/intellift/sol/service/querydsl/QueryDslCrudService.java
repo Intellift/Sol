@@ -1,6 +1,5 @@
 package org.intellift.sol.service.querydsl;
 
-
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
 import javaslang.collection.Stream;
@@ -17,9 +16,6 @@ import java.io.Serializable;
 import java.util.Objects;
 import java.util.function.Supplier;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Serializable> extends CrudService<E, ID> {
 
     @Override

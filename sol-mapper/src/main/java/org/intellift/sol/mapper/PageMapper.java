@@ -9,9 +9,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public interface PageMapper<E, D> extends Mapper<E, D> {
 
     default Page<D> mapTo(final Page<E> page) {

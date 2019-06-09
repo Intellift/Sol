@@ -5,14 +5,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-/**
- * @author Achilleas Naoumidis
- */
 @Configuration
 public class SolControllerConfiguration {
 
     @Bean
-    @ConditionalOnMissingBean(JavaslangModule.class)
+    @ConditionalOnMissingBean
     public JavaslangModule javaslangModule() {
         return new JavaslangModule();
     }

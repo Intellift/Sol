@@ -16,10 +16,12 @@
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-service</artifactId>
+            <version>0.5.0</version>
         </dependency>
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-mapper</artifactId>
+            <version>0.5.0</version>
         </dependency>
 
         <dependency>

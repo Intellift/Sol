@@ -13,12 +13,9 @@ import java.net.URI;
 import java.util.Objects;
 import java.util.function.BiFunction;
 
-/**
- * @author Achilleas Naoumidis
- */
 public abstract class SdkUtils {
 
-    public static Stream<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+    public static Stream<Tuple2<String, String>> flattenParameterValues(final Iterable<Tuple2<String, ? extends Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
         return Stream.ofAll(parameters)

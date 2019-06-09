@@ -5,24 +5,25 @@ import javaslang.Tuple;
 import javaslang.Tuple2;
 import javaslang.collection.Stream;
 import javaslang.concurrent.Future;
+import javaslang.control.Option;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
 import org.springframework.http.*;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestOperations;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.Serializable;
 import java.util.Collections;
 import java.util.Objects;
 
+import static javaslang.API.*;
+import static javaslang.Predicates.instanceOf;
 import static javaslang.concurrent.Future.fromJavaFuture;
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID extends Serializable> implements CrudApiAsyncClient<D, ID> {
 
     protected final AsyncRestOperations asyncRestOperations;
@@ -54,7 +55,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     @Override
-    public Future<Page<D>> getPage(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+    public Future<Page<D>> getPage(final Iterable<Tuple2<String, ? extends Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
         return buildUri(getEndpoint(), flattenParameterValues(parameters))
@@ -76,7 +77,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     @Override
-    public Future<Page<D>> getAll(final Iterable<Tuple2<String, Iterable<String>>> parameters) {
+    public Future<Page<D>> getAll(final Iterable<Tuple2<String, ? extends Iterable<String>>> parameters) {
         Objects.requireNonNull(parameters, "parameters is null");
 
         final String endpoint = getEndpoint();
@@ -122,7 +123,7 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
     }
 
     @Override
-    public Future<D> getOne(final ID id) {
+    public Future<Option<D>> getOne(final ID id) {
         Objects.requireNonNull(id, "id is null");
 
         final ListenableFuture<ResponseEntity<D>> future = asyncRestOperations.exchange(
@@ -133,7 +134,19 @@ public abstract class AbstractCrudApiAsyncClient<D extends Identifiable<ID>, ID 
         );
 
         return fromJavaFuture(future)
-                .map(ResponseEntity::getBody);
+                .map(ResponseEntity::getBody)
+                .map(Option::of)
+                .recoverWith(throwable -> Match(throwable).of(
+
+                        Case(instanceOf(HttpClientErrorException.class), e -> {
+                            if (e.getRawStatusCode() == HttpStatus.NOT_FOUND.value()) {
+                                return Future.successful(Option.<D>none());
+                            } else {
+                                return Future.<Option<D>>failed(e);
+                            }
+                        }),
+
+                        Case($(), Future::failed)));
     }
 
     @Override

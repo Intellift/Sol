@@ -5,9 +5,6 @@ import sun.reflect.generics.reflectiveObjects.ParameterizedTypeImpl;
 
 import java.lang.reflect.Type;
 
-/**
- * @author Achilleas Naoumidis, Chrisostomos Bakouras
- */
 public class PageResponseTypeReference<T> extends ParameterizedTypeReference<T> {
 
     private final Class<?> dtoClass;
