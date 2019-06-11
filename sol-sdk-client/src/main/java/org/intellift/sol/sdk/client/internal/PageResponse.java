@@ -134,7 +134,7 @@ public class PageResponse<D> extends PageImpl<D> {
     public Page<D> pageImpl() {
         return new PageImpl<>(
                 getContent(),
-                new PageRequest(getNumber(), getSize(), getSort()),
+                PageRequest.of(getNumber(), getSize(), getSort()),
                 getTotalElements()
         );
     }

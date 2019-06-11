@@ -1,6 +1,6 @@
 package org.intellift.sol.controller.api;
 
-import javaslang.control.Try;
+import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.mapper.Mapper;
 import org.intellift.sol.service.CrudService;
@@ -29,7 +29,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     CrudService<E, ID> getService();
 
     @GetMapping("/{id}")
-    default ResponseEntity<D> getOne(@PathVariable("id") final ID id) {
+    default ResponseEntity<D> getOne(@PathVariable("id") final ID id) throws Throwable {
         final Function<ID, Try<ResponseEntity<D>>> getOne = CrudApiDefaultImpl.getOne(
                 getService()::findOne,
                 getMapper()::mapTo
@@ -43,7 +43,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     }
 
     @PostMapping
-    default ResponseEntity<D> post(@RequestBody final RD dto) {
+    default ResponseEntity<D> post(@RequestBody final RD dto) throws Throwable {
         final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final Function<RD, Try<ResponseEntity<D>>> asymmetricPost = CrudApiDefaultImpl.asymmetricPost(
@@ -61,7 +61,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     }
 
     @PutMapping("/{id}")
-    default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final RD dto) {
+    default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final RD dto) throws Throwable {
         final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final BiFunction<ID, RD, Try<ResponseEntity<D>>> asymmetricPut = CrudApiDefaultImpl.asymmetricPut(
@@ -81,7 +81,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     }
 
     @DeleteMapping("/{id}")
-    default ResponseEntity<Void> delete(@PathVariable("id") final ID id) {
+    default ResponseEntity<Void> delete(@PathVariable("id") final ID id) throws Throwable {
         final Function<ID, Try<ResponseEntity<Void>>> delete = CrudApiDefaultImpl.delete(getService()::delete);
 
         return delete.apply(id)

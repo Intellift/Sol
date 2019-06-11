@@ -1,6 +1,6 @@
 package org.intellift.sol.controller.api;
 
-import javaslang.control.Try;
+import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.mapper.Mapper;
 import org.springframework.hateoas.mvc.ControllerLinkBuilder;
@@ -25,7 +25,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
 
     @Override
     @PostMapping
-    default ResponseEntity<D> post(@RequestBody final D dto) {
+    default ResponseEntity<D> post(@RequestBody final D dto) throws Throwable {
         final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final Function<D, Try<ResponseEntity<D>>> post = CrudApiDefaultImpl.post(
@@ -44,7 +44,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
 
     @Override
     @PutMapping("/{id}")
-    default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final D dto) {
+    default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final D dto) throws Throwable {
         final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final BiFunction<ID, D, Try<ResponseEntity<D>>> put = CrudApiDefaultImpl.put(

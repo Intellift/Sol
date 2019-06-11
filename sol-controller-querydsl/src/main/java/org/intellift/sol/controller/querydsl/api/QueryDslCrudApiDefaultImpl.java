@@ -1,8 +1,8 @@
 package org.intellift.sol.controller.querydsl.api;
 
 import com.querydsl.core.types.Predicate;
-import javaslang.Function2;
-import javaslang.control.Try;
+import io.vavr.Function2;
+import io.vavr.control.Try;
 import org.intellift.sol.controller.api.CrudApiDefaultImpl;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;

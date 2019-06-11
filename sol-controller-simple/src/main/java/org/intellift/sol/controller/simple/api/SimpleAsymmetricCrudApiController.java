@@ -1,6 +1,6 @@
 package org.intellift.sol.controller.simple.api;
 
-import javaslang.control.Try;
+import io.vavr.control.Try;
 import org.intellift.sol.controller.api.AsymmetricCrudApiController;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.mapper.PageMapper;
@@ -22,7 +22,7 @@ public interface SimpleAsymmetricCrudApiController<E extends Identifiable<ID>, D
     PageMapper<E, RD> getReferenceMapper();
 
     @GetMapping
-    default ResponseEntity<Page<D>> getAll(final Pageable pageable) {
+    default ResponseEntity<Page<D>> getAll(final Pageable pageable) throws Throwable {
         final Function<Pageable, Try<ResponseEntity<Page<D>>>> getAll = SimpleCrudApiDefaultImpl.getAll(
                 getService()::findAll,
                 getMapper()::mapTo

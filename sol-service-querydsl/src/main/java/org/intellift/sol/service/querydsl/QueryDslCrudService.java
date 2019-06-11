@@ -2,9 +2,9 @@ package org.intellift.sol.service.querydsl;
 
 import com.querydsl.core.types.OrderSpecifier;
 import com.querydsl.core.types.Predicate;
-import javaslang.collection.Stream;
-import javaslang.control.Option;
-import javaslang.control.Try;
+import io.vavr.collection.Stream;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.domain.querydsl.repository.QueryDslRepository;
 import org.intellift.sol.service.CrudService;

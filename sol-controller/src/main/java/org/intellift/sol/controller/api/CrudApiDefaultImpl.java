@@ -1,9 +1,9 @@
 package org.intellift.sol.controller.api;
 
-import javaslang.Function1;
-import javaslang.Function2;
-import javaslang.control.Option;
-import javaslang.control.Try;
+import io.vavr.Function1;
+import io.vavr.Function2;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.http.ResponseEntity;
 
@@ -11,9 +11,9 @@ import java.io.Serializable;
 import java.net.URI;
 import java.util.function.Function;
 
-import static javaslang.API.*;
-import static javaslang.Patterns.None;
-import static javaslang.Patterns.Some;
+import static io.vavr.API.*;
+import static io.vavr.Patterns.$None;
+import static io.vavr.Patterns.$Some;
 
 public abstract class CrudApiDefaultImpl {
 
@@ -23,10 +23,10 @@ public abstract class CrudApiDefaultImpl {
         return (final ID id) -> findOne.apply(id)
                 .map(optionalEntity -> Match(optionalEntity).<ResponseEntity<D>>of(
 
-                        Case(Some($()), entity -> ResponseEntity
+                        Case($Some($()), entity -> ResponseEntity
                                 .ok(toDTO.apply(entity))),
 
-                        Case(None(), ResponseEntity
+                        Case($None(), ResponseEntity
                                 .notFound()
                                 .build())));
     }

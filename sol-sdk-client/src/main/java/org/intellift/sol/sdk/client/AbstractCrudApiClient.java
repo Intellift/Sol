@@ -1,11 +1,11 @@
 package org.intellift.sol.sdk.client;
 
-import javaslang.Function2;
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.Stream;
-import javaslang.control.Option;
-import javaslang.control.Try;
+import io.vavr.Function2;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.Stream;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.sdk.client.internal.PageResponseTypeReference;
 import org.springframework.data.domain.Page;
@@ -17,8 +17,8 @@ import java.io.Serializable;
 import java.util.Collections;
 import java.util.Objects;
 
-import static javaslang.API.*;
-import static javaslang.Predicates.instanceOf;
+import static io.vavr.API.*;
+import static io.vavr.Predicates.instanceOf;
 import static org.intellift.sol.sdk.client.SdkUtils.buildUri;
 import static org.intellift.sol.sdk.client.SdkUtils.flattenParameterValues;
 
@@ -123,7 +123,7 @@ public abstract class AbstractCrudApiClient<D extends Identifiable<ID>, ID exten
                 .map(Option::of)
                 .recoverWith(throwable -> Match(throwable).of(
 
-                        Case(instanceOf(HttpClientErrorException.class), e -> {
+                        Case($(instanceOf(HttpClientErrorException.class)), e -> {
                             if (e.getRawStatusCode() == HttpStatus.NOT_FOUND.value()) {
                                 return Try.success(Option.<D>none());
                             } else {

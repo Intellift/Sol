@@ -15,16 +15,15 @@
         <dependency>
             <groupId>org.intellift.sol</groupId>
             <artifactId>sol-domain</artifactId>
-            <version>0.5.0</version>
         </dependency>
 
         <dependency>
-            <groupId>io.javaslang</groupId>
-            <artifactId>javaslang</artifactId>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr</artifactId>
         </dependency>
         <dependency>
-            <groupId>io.javaslang</groupId>
-            <artifactId>javaslang-jackson</artifactId>
+            <groupId>io.vavr</groupId>
+            <artifactId>vavr-jackson</artifactId>
         </dependency>
 
         <dependency>

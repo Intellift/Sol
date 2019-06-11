@@ -1,11 +1,11 @@
 package org.intellift.sol.sdk.client;
 
-import javaslang.Tuple;
-import javaslang.Tuple2;
-import javaslang.collection.Foldable;
-import javaslang.collection.Seq;
-import javaslang.collection.Stream;
-import javaslang.control.Try;
+import io.vavr.Tuple;
+import io.vavr.Tuple2;
+import io.vavr.collection.Foldable;
+import io.vavr.collection.Seq;
+import io.vavr.collection.Stream;
+import io.vavr.control.Try;
 import org.springframework.web.util.UriComponentsBuilder;
 import org.springframework.web.util.UriUtils;
 
@@ -38,7 +38,7 @@ public abstract class SdkUtils {
         Objects.requireNonNull(endpoint, "endpoint is null");
         Objects.requireNonNull(parameters, "parameters is null");
 
-        final BiFunction<UriComponentsBuilder, Tuple2<String, String>, UriComponentsBuilder> reducer = (builder, parameterNameValue) -> parameterNameValue.transform(builder::queryParam);
+        final BiFunction<UriComponentsBuilder, Tuple2<String, String>, UriComponentsBuilder> reducer = (builder, parameterNameValue) -> parameterNameValue.apply(builder::queryParam);
 
         return parameters
                 .foldLeft(UriComponentsBuilder.fromUriString(endpoint), reducer)

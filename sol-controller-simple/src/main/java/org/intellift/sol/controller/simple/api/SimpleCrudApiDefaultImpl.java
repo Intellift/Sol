@@ -1,7 +1,7 @@
 package org.intellift.sol.controller.simple.api;
 
-import javaslang.Function1;
-import javaslang.control.Try;
+import io.vavr.Function1;
+import io.vavr.control.Try;
 import org.intellift.sol.controller.api.CrudApiDefaultImpl;
 import org.intellift.sol.domain.Identifiable;
 import org.springframework.data.domain.Page;

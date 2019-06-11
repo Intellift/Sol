@@ -1,7 +1,7 @@
 package org.intellift.sol.controller.querydsl.api;
 
 import com.querydsl.core.types.Predicate;
-import javaslang.control.Try;
+import io.vavr.control.Try;
 import org.intellift.sol.controller.api.CrudApiController;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.mapper.PageMapper;
@@ -29,7 +29,7 @@ public interface QueryDslCrudApiController<E extends Identifiable<ID>, D extends
     QueryDslCrudService<E, ID> getService();
 
     @GetMapping
-    ResponseEntity<Page<D>> getAll(Predicate predicate, Pageable pageable);
+    ResponseEntity<Page<D>> getAll(Predicate predicate, Pageable pageable) throws Throwable;
 
     default ResponseEntity<Page<D>> getAllDefaultImplementation(final Predicate predicate, final Pageable pageable) {
         final BiFunction<Predicate, Pageable, Try<ResponseEntity<Page<D>>>> getAll = QueryDslCrudApiDefaultImpl.getAll(

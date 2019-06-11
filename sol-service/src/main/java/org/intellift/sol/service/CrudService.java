@@ -1,11 +1,11 @@
 package org.intellift.sol.service;
 
-import javaslang.collection.List;
-import javaslang.collection.Seq;
-import javaslang.collection.Stream;
-import javaslang.control.Either;
-import javaslang.control.Option;
-import javaslang.control.Try;
+import io.vavr.collection.List;
+import io.vavr.collection.Seq;
+import io.vavr.collection.Stream;
+import io.vavr.control.Either;
+import io.vavr.control.Option;
+import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.domain.repository.Repository;
 import org.springframework.data.domain.Page;
