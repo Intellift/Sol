@@ -18,15 +18,20 @@ import java.util.function.BiFunction;
 public interface QueryDslCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> extends CrudApiController<E, D, ID> {
 
     @Override
-    PageMapper<E, D> getMapper();
+    QueryDslCrudService<E, ID> getService();
 
     @Override
-    default PageMapper<E, D> getReferenceMapper() {
+    default PageMapper<E, D> getDeepMapper() {
         return getMapper();
     }
 
     @Override
-    QueryDslCrudService<E, ID> getService();
+    default PageMapper<E, D> getShallowMapper() {
+        return getMapper();
+    }
+
+    @Override
+    PageMapper<E, D> getMapper();
 
     @GetMapping
     ResponseEntity<Page<D>> getAll(Predicate predicate, Pageable pageable) throws Throwable;

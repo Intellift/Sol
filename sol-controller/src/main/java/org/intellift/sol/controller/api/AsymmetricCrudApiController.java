@@ -16,23 +16,23 @@ import java.net.URI;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, RD extends Identifiable<ID>, ID extends Serializable> {
+public interface AsymmetricCrudApiController<E extends Identifiable<ID>, DD extends Identifiable<ID>, SD extends Identifiable<ID>, ID extends Serializable> {
 
     default Logger getLogger() {
         return LoggerFactory.getLogger(getClass());
     }
 
-    Mapper<E, D> getMapper();
-
-    Mapper<E, RD> getReferenceMapper();
-
     CrudService<E, ID> getService();
 
+    Mapper<E, DD> getDeepMapper();
+
+    Mapper<E, SD> getShallowMapper();
+
     @GetMapping("/{id}")
-    default ResponseEntity<D> getOne(@PathVariable("id") final ID id) throws Throwable {
-        final Function<ID, Try<ResponseEntity<D>>> getOne = CrudApiDefaultImpl.getOne(
+    default ResponseEntity<DD> getOne(@PathVariable("id") final ID id) throws Throwable {
+        final Function<ID, Try<ResponseEntity<DD>>> getOne = CrudApiDefaultImpl.getOne(
                 getService()::findOne,
-                getMapper()::mapTo
+                getDeepMapper()::mapTo
         );
 
         return getOne.apply(id)
@@ -43,13 +43,13 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     }
 
     @PostMapping
-    default ResponseEntity<D> post(@RequestBody final RD dto) throws Throwable {
+    default ResponseEntity<DD> post(@RequestBody final SD dto) throws Throwable {
         final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
-        final Function<RD, Try<ResponseEntity<D>>> asymmetricPost = CrudApiDefaultImpl.asymmetricPost(
+        final Function<SD, Try<ResponseEntity<DD>>> asymmetricPost = CrudApiDefaultImpl.asymmetricPost(
                 getService()::create,
-                getReferenceMapper()::mapFrom,
-                getMapper()::mapTo,
+                getShallowMapper()::mapFrom,
+                getDeepMapper()::mapTo,
                 constructLocation
         );
 
@@ -61,15 +61,15 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, D exten
     }
 
     @PutMapping("/{id}")
-    default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final RD dto) throws Throwable {
+    default ResponseEntity<DD> put(@PathVariable("id") final ID id, @RequestBody final SD dto) throws Throwable {
         final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
-        final BiFunction<ID, RD, Try<ResponseEntity<D>>> asymmetricPut = CrudApiDefaultImpl.asymmetricPut(
+        final BiFunction<ID, SD, Try<ResponseEntity<DD>>> asymmetricPut = CrudApiDefaultImpl.asymmetricPut(
                 getService()::exists,
                 getService()::create,
                 getService()::update,
-                getReferenceMapper()::mapFrom,
-                getMapper()::mapTo,
+                getShallowMapper()::mapFrom,
+                getDeepMapper()::mapTo,
                 constructLocation
         );
 

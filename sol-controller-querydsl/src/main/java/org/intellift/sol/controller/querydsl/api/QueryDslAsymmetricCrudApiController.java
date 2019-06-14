@@ -15,24 +15,24 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.io.Serializable;
 import java.util.function.BiFunction;
 
-public interface QueryDslAsymmetricCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, RD extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, RD, ID> {
-
-    @Override
-    PageMapper<E, D> getMapper();
-
-    @Override
-    PageMapper<E, RD> getReferenceMapper();
+public interface QueryDslAsymmetricCrudApiController<E extends Identifiable<ID>, DD extends Identifiable<ID>, SD extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, DD, SD, ID> {
 
     @Override
     QueryDslCrudService<E, ID> getService();
 
-    @GetMapping
-    ResponseEntity<Page<D>> getAll(Predicate predicate, Pageable pageable) throws Throwable;
+    @Override
+    PageMapper<E, DD> getDeepMapper();
 
-    default ResponseEntity<Page<D>> getAllDefaultImplementation(final Predicate predicate, final Pageable pageable) {
-        final BiFunction<Predicate, Pageable, Try<ResponseEntity<Page<D>>>> getAll = QueryDslCrudApiDefaultImpl.getAll(
+    @Override
+    PageMapper<E, SD> getShallowMapper();
+
+    @GetMapping
+    ResponseEntity<Page<DD>> getAll(Predicate predicate, Pageable pageable) throws Throwable;
+
+    default ResponseEntity<Page<DD>> getAllDefaultImplementation(final Predicate predicate, final Pageable pageable) {
+        final BiFunction<Predicate, Pageable, Try<ResponseEntity<Page<DD>>>> getAll = QueryDslCrudApiDefaultImpl.getAll(
                 getService()::findAll,
-                getMapper()::mapTo
+                getDeepMapper()::mapTo
         );
 
         return getAll.apply(predicate, pageable)

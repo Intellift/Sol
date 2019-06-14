@@ -19,9 +19,16 @@ import java.util.function.Function;
 public interface CrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> extends AsymmetricCrudApiController<E, D, D, ID> {
 
     @Override
-    default Mapper<E, D> getReferenceMapper() {
+    default Mapper<E, D> getDeepMapper() {
         return getMapper();
     }
+
+    @Override
+    default Mapper<E, D> getShallowMapper() {
+        return getMapper();
+    }
+
+    Mapper<E, D> getMapper();
 
     @Override
     @PostMapping

@@ -16,12 +16,17 @@ import java.util.function.Function;
 public interface SimpleCrudApiController<E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable> extends CrudApiController<E, D, ID> {
 
     @Override
-    PageMapper<E, D> getMapper();
-
-    @Override
-    default PageMapper<E, D> getReferenceMapper() {
+    default PageMapper<E, D> getDeepMapper() {
         return getMapper();
     }
+
+    @Override
+    default PageMapper<E, D> getShallowMapper() {
+        return getMapper();
+    }
+
+    @Override
+    PageMapper<E, D> getMapper();
 
     @GetMapping
     default ResponseEntity<Page<D>> getAll(final Pageable pageable) throws Throwable {
