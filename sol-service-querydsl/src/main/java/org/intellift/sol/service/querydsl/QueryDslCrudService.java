@@ -21,6 +21,29 @@ public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Seri
     @Override
     QueryDslRepository<E, ID> getRepository();
 
+    default Try<Boolean> exists(final Predicate predicate) {
+        Objects.requireNonNull(predicate, "predicate is null");
+
+        return Try.of(() -> getRepository().exists(predicate));
+    }
+
+    default Try<Long> count(final Predicate predicate) {
+        Objects.requireNonNull(predicate, "predicate is null");
+
+        return Try.of(() -> getRepository().count(predicate));
+    }
+
+    default Try<Option<E>> findOne(final Predicate predicate) {
+        return Try.of(() -> Option.ofOptional(getRepository().findOne(predicate)));
+    }
+
+    default Try<E> findOne(final Predicate predicate, final Supplier<? extends Exception> ifNotFound) {
+        Objects.requireNonNull(ifNotFound, "ifNotFound is null");
+
+        return Try.of(() -> Option.ofOptional(getRepository().findOne(predicate)))
+                .flatMap(entityOption -> entityOption.toTry(ifNotFound));
+    }
+
     default Try<Stream<E>> findAll(final Predicate predicate) {
         return Try.of(() -> Stream.ofAll(getRepository().findAll(predicate)));
     }
@@ -41,16 +64,5 @@ public interface QueryDslCrudService<E extends Identifiable<ID>, ID extends Seri
 
     default Try<Page<E>> findAll(final Predicate predicate, final Pageable pageable) {
         return Try.of(() -> getRepository().findAll(predicate, pageable));
-    }
-
-    default Try<Option<E>> findOne(final Predicate predicate) {
-        return Try.of(() -> Option.ofOptional(getRepository().findOne(predicate)));
-    }
-
-    default Try<E> findOne(final Predicate predicate, final Supplier<? extends Exception> ifNotFound) {
-        Objects.requireNonNull(ifNotFound, "ifNotFound is null");
-
-        return Try.of(() -> Option.ofOptional(getRepository().findOne(predicate)))
-                .flatMap(entityOption -> entityOption.toTry(ifNotFound));
     }
 }
