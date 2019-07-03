@@ -10,25 +10,18 @@ import org.springframework.http.ResponseEntity;
 import java.io.Serializable;
 import java.net.URI;
 import java.util.function.Function;
-
-import static io.vavr.API.*;
-import static io.vavr.Patterns.$None;
-import static io.vavr.Patterns.$Some;
+import java.util.function.Supplier;
 
 public abstract class CrudApiDefaultImpl {
 
     public static <E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable>
     Function1<ID, Try<ResponseEntity<D>>> getOne(final Function<ID, Try<Option<E>>> findOne,
                                                  final Function<E, D> toDTO) {
+        final Supplier<ResponseEntity<D>> toNotFoundResponse = ResponseEntity.notFound()::build;
+        final Function<E, ResponseEntity<D>> toOkResponse = toDTO.andThen(ResponseEntity::ok);
+
         return (final ID id) -> findOne.apply(id)
-                .map(optionalEntity -> Match(optionalEntity).<ResponseEntity<D>>of(
-
-                        Case($Some($()), entity -> ResponseEntity
-                                .ok(toDTO.apply(entity))),
-
-                        Case($None(), ResponseEntity
-                                .notFound()
-                                .build())));
+                .map(optionEntity -> optionEntity.fold(toNotFoundResponse, toOkResponse));
     }
 
     public static <E extends Identifiable<ID>, D extends Identifiable<ID>, ID extends Serializable>
