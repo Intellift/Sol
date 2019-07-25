@@ -16,7 +16,8 @@
 
         <java.version>1.8</java.version>
         <spring-boot.version>2.1.5.RELEASE</spring-boot.version>
-        <vavr.version>0.10.0</vavr.version>
+        <vavr.version>1.0.0-alpha-3</vavr.version>
+        <vavr-jackson.version>0.10.0</vavr-jackson.version>
     </properties>
 
     <modules>
@@ -53,7 +54,7 @@
             <dependency>
                 <groupId>io.vavr</groupId>
                 <artifactId>vavr-jackson</artifactId>
-                <version>${vavr.version}</version>
+                <version>${vavr-jackson.version}</version>
             </dependency>
 
             <dependency>
