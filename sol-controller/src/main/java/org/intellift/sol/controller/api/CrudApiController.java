@@ -3,7 +3,7 @@ package org.intellift.sol.controller.api;
 import io.vavr.control.Try;
 import org.intellift.sol.domain.Identifiable;
 import org.intellift.sol.mapper.Mapper;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -33,7 +33,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
     @Override
     @PostMapping
     default ResponseEntity<D> post(@RequestBody final D dto) throws Throwable {
-        final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
+        final Function<ID, URI> constructLocation = persistedId -> WebMvcLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final Function<D, Try<ResponseEntity<D>>> post = CrudApiDefaultImpl.post(
                 getService()::create,
@@ -52,7 +52,7 @@ public interface CrudApiController<E extends Identifiable<ID>, D extends Identif
     @Override
     @PutMapping("/{id}")
     default ResponseEntity<D> put(@PathVariable("id") final ID id, @RequestBody final D dto) throws Throwable {
-        final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
+        final Function<ID, URI> constructLocation = persistedId -> WebMvcLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final BiFunction<ID, D, Try<ResponseEntity<D>>> put = CrudApiDefaultImpl.put(
                 getService()::exists,

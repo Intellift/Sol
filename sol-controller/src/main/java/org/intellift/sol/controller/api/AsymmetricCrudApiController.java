@@ -6,7 +6,7 @@ import org.intellift.sol.mapper.Mapper;
 import org.intellift.sol.service.CrudService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.hateoas.mvc.ControllerLinkBuilder;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -44,7 +44,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, DD exte
 
     @PostMapping
     default ResponseEntity<DD> post(@RequestBody final SD dto) throws Throwable {
-        final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
+        final Function<ID, URI> constructLocation = persistedId -> WebMvcLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final Function<SD, Try<ResponseEntity<DD>>> asymmetricPost = CrudApiDefaultImpl.asymmetricPost(
                 getService()::create,
@@ -62,7 +62,7 @@ public interface AsymmetricCrudApiController<E extends Identifiable<ID>, DD exte
 
     @PutMapping("/{id}")
     default ResponseEntity<DD> put(@PathVariable("id") final ID id, @RequestBody final SD dto) throws Throwable {
-        final Function<ID, URI> constructLocation = persistedId -> ControllerLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
+        final Function<ID, URI> constructLocation = persistedId -> WebMvcLinkBuilder.linkTo(getClass()).slash(persistedId).toUri();
 
         final BiFunction<ID, SD, Try<ResponseEntity<DD>>> asymmetricPut = CrudApiDefaultImpl.asymmetricPut(
                 getService()::exists,
